@@ -218,3 +218,27 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- SECURITY AND CREDENTIALS ---
+# Never send real credentials to GitHub
+secrets.env
+*.env
+!secrets.example.env
+config.json
+credentials.yaml
+
+# --- HEAVY AND SATELLITE DATA ---
+# Prevent gigantic satellite files (.csv, .nc, .parquet, .h5) in Git
+data/
+*.csv
+*.nc
+*.parquet
+*.h5
+*.zip
+*.tar.gz
+
+# --- VIRTUAL ENVIRONMENTS AND SYSTEMS ---
+venv/
+__pycache__/
+.vscode/
+.DS_Store
