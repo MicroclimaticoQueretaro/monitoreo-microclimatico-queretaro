@@ -3,10 +3,11 @@ from pyspark.sql.functions import col, isnan, when, count
 
 spark = SparkSession.builder \
     .appName("ETL_CONAGUA_Microclima") \
+    .config("spark.jars.packages", "org.postgresql:postgresql:42.6.0") \
     .getOrCreate()
 
-df_conagua = spark.read.csv("conagua_10k_recientes.csv", header=True, inferSchema=True)
-df_pueblito = spark.read.csv("El_Pueblito_10K.csv", header=True, inferSchema=True)
+df_conagua = spark.read.csv("conagua_10k_recientes.csv", header=True, inferSchema=True, nullValue="NULO")
+df_pueblito = spark.read.csv("El_Pueblito_10K.csv", header=True, inferSchema=True, nullValue="NULO")
 
 print("=== Esquema de CONAGUA ===")
 df_conagua.printSchema()
@@ -32,3 +33,19 @@ df_pueblito_limpio = df_pueblito.na.drop()
 
 print("=== Nuevo Esquema Limpio y Listo (El Pueblito) ===")
 df_pueblito_limpio.printSchema()
+
+# 7. Carga de datos a PostgreSQL
+print("=== Iniciando guardado en Base de Datos ===")
+
+db_url = "jdbc:postgresql://localhost:5433/microclima_db"
+db_properties = {
+    "user": "admin",
+    "password": "admin_clima_2026",
+    "driver": "org.postgresql.Driver"
+}
+
+# Escribir DataFrames como tablas en la base de datos
+df_conagua_limpio.write.jdbc(url=db_url, table="conagua_historico", mode="overwrite", properties=db_properties)
+df_pueblito_limpio.write.jdbc(url=db_url, table="pueblito_historico", mode="overwrite", properties=db_properties)
+
+print("¡Datos históricos guardados exitosamente en PostgreSQL!")
