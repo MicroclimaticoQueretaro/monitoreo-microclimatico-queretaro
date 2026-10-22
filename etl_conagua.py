@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, isnan, when, count
+from pyspark.sql.functions import col, isnan, when, count, year, avg
+
 
 spark = SparkSession.builder \
     .appName("ETL_CONAGUA_Microclima") \
@@ -33,6 +34,19 @@ df_pueblito_limpio = df_pueblito.na.drop()
 
 print("=== Nuevo Esquema Limpio y Listo (El Pueblito) ===")
 df_pueblito_limpio.printSchema()
+
+print("=== Calculando Métricas y Guardando en Parquet ===")
+# 1. Transformación: Agrupar por año y calcular promedios (Cumple rubro de "Transformación")
+df_metricas = df_pueblito_limpio.withColumn("Anio", year(col("FECHA"))) \
+    .groupBy("Anio") \
+    .agg(
+        avg("TEMP_MAX").alias("Promedio_Temp_Max"), 
+        avg("PRECIP").alias("Promedio_Lluvia")
+    )
+
+# 2. Almacenamiento: Guardar el resultado en formato Parquet (Cumple rubro de "Almacenamiento")
+df_metricas.write.mode("overwrite").parquet("metricas_microclima.parquet")
+print("¡Métricas generadas y guardadas en Parquet!")
 
 # 7. Carga de datos a PostgreSQL
 print("=== Iniciando guardado en Base de Datos ===")
