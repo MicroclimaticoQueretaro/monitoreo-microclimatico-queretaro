@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  db_microclima:
+    image: postgres:15
+    container_name: postgres_clima
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin_clima_2026
+      POSTGRES_DB: microclima_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
