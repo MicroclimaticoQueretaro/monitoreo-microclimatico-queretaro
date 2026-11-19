@@ -1,14 +1,14 @@
 import pandas as pd
 import numpy as np
 
-def alinear_temporal_espacial(caminho_iot, caminho_satelite_tratado, caminho_saida_unificado):
+def alinear_temporal_espacial(ruta_iot, ruta_satelite_tratado, ruta_salida_unificado):
     print("🔄 Iniciando la alineación temporal y espacial entre IoT y Satélite...")
     
     # 1. Cargar los datos limpios de ambas fuentes
     # Datos de los sensores físicos (ESP32 en la calle)
-    df_iot = pd.read_csv(caminho_iot)
+    df_iot = pd.read_csv(ruta_iot)
     # Datos macroclimáticos ya filtrados del satélite
-    df_satelite = pd.read_csv(caminho_satelite_tratado)
+    df_satelite = pd.read_csv(ruta_satelite_tratado)
     
     # 2. Asegurarnos de que las marcas de tiempo (timestamps) sean tratadas como fechas de Pandas
     df_iot['timestamp'] = pd.to_datetime(df_iot['timestamp'])
@@ -38,8 +38,8 @@ def alinear_temporal_espacial(caminho_iot, caminho_satelite_tratado, caminho_sai
     df_unificado['brecha_termica'] = df_unificado['temperature_iot'] - df_unificado['temperature_satelite']
     
     # 6. Guardar la tabla unificada resultante en un nuevo archivo CSV
-    df_unificado.to_csv(caminho_saida_unificado, index=False)
-    print(f"✅ ¡Alineación completada con éxito! Archivo unificado guardado en: {caminho_saida_unificado}")
+    df_unificado.to_csv(ruta_salida_unificado, index=False)
+    print(f"✅ ¡Alineación completada con éxito! Archivo unificado guardado en: {ruta_salida_unificado}")
     print(f"📊 Total de registros cruzados: {len(df_unificado)}")
     
     return df_unificado

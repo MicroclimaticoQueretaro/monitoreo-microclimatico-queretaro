@@ -1,11 +1,11 @@
 import pandas as pd
 import numpy as np
 
-def calcular_metricas_base(caminho_dados_satelite):
+def calcular_metricas_base(ruta_datos_satelite):
     print("Iniciando Analítica Exploratoria Preliminar (EDA) de los datos históricos...")
     
     # 1. Cargar el dataset histórico y limpio de satélite (3 años)
-    df = pd.read_csv(caminho_dados_satelite)
+    df = pd.read_csv(ruta_datos_satelite)
     
     # Asegurar formato de fecha
     df['timestamp'] = pd.to_datetime(df['timestamp'])
@@ -38,6 +38,4 @@ def calcular_metricas_base(caminho_dados_satelite):
     return metricas
 
 if __name__ == "__main__":
-    # Ruta de ejemplo para pruebas locales
-    # calcular_metricas_base("satelite_queretaro_tratado.csv")
-    pass
+    calcular_metricas_base("data_science/notebooks/satelite_queretaro_tratado.csv")
