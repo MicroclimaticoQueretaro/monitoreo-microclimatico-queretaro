@@ -105,8 +105,7 @@ SELECT
     ROUND(AVG(presion_hpa), 1)                                     AS presion_media_hpa,
     ROUND(AVG(radiacion_wm2), 1)                                   AS radiacion_media_wm2
 FROM historico_era5
-GROUP BY 1, 2
-WITH NO DATA;   -- se llena al cargar el histórico (ver data_science/cargar_bd.py)
+GROUP BY 1, 2;   -- vacía al inicio; se actualiza al cargar el histórico (data_science/cargar_bd.py)
 
 -- Índice único: necesario para REFRESH ... CONCURRENTLY y para búsquedas rápidas por (mes, hora)
 CREATE UNIQUE INDEX IF NOT EXISTS idx_climatologia_mes_hora ON climatologia (mes, hora);

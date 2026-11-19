@@ -1,0 +1,84 @@
+"""Modelos Pydantic: definen y validan el formato de los datos que entran y salen de la API.
+
+Este archivo es el "contrato" entre el firmware del ESP32 y la API.
+"""
+
+from datetime import datetime
+
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
+
+# Código de estación: solo mayúsculas, números y guiones (ej. QRO-CENTRO-01)
+PATRON_CODIGO_ESTACION = r"^[A-Z0-9-]{3,30}$"
+
+
+class LecturaEntrada(BaseModel):
+    """Lectura enviada por el ESP32. Los rangos coinciden con los CHECK de la base de datos."""
+
+    # extra="forbid" rechaza campos desconocidos (evita errores de escritura silenciosos)
+    model_config = ConfigDict(extra="forbid")
+
+    estacion: str = Field(pattern=PATRON_CODIGO_ESTACION, examples=["QRO-CENTRO-01"])
+    # AwareDatetime exige zona horaria, ej. 2026-11-19T14:30:00-06:00
+    ts: AwareDatetime
+    temperatura_dht: float | None = Field(default=None, ge=-10, le=60)
+    temperatura_bmp: float | None = Field(default=None, ge=-10, le=60)
+    humedad: float | None = Field(default=None, ge=0, le=100)
+    presion_hpa: float | None = Field(default=None, ge=700, le=1100)
+    iluminancia_lux: float | None = Field(default=None, ge=0, le=200000)
+
+    @model_validator(mode="after")
+    def validar_al_menos_una_medicion(self) -> "LecturaEntrada":
+        mediciones = [
+            self.temperatura_dht,
+            self.temperatura_bmp,
+            self.humedad,
+            self.presion_hpa,
+            self.iluminancia_lux,
+        ]
+        if all(valor is None for valor in mediciones):
+            raise ValueError("La lectura debe incluir al menos una medición.")
+        return self
+
+
+class LecturaCreada(BaseModel):
+    mensaje: str
+    estacion: str
+    ts: datetime
+
+
+class Lectura(BaseModel):
+    ts: datetime
+    temperatura_dht: float | None
+    temperatura_bmp: float | None
+    humedad: float | None
+    presion_hpa: float | None
+    iluminancia_lux: float | None
+
+
+class Estacion(BaseModel):
+    """Datos públicos de una estación (nunca incluye el hash del token)."""
+
+    codigo: str
+    nombre: str
+    latitud: float
+    longitud: float
+    altitud_m: float | None
+    activa: bool
+
+
+class Comparacion(BaseModel):
+    """Lectura del sensor frente a la climatología (lo 'normal' para ese mes y hora)."""
+
+    ts: datetime
+    temperatura_sensor: float | None = Field(
+        description="Temperatura de referencia: BMP280 si existe (más precisa), si no DHT11."
+    )
+    temperatura_normal: float | None
+    anomalia_temperatura: float | None = Field(
+        description="Sensor menos normal. Positivo = más caliente de lo habitual."
+    )
+    anomalia_estandarizada: float | None = Field(
+        description="Anomalía dividida entre la desviación estándar (|z| > 2 es inusual)."
+    )
+    humedad_sensor: float | None
+    humedad_normal: float | None
