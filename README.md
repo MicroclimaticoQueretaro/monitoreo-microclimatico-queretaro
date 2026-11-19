@@ -57,8 +57,10 @@ flowchart LR
 ├── data_science/
 │   ├── etl_satelite.py          # Limpieza y estandarización del histórico ERA5
 │   ├── corregir_humedad_era5.py # Reemplaza la humedad por humedad relativa de ERA5
+│   ├── cargar_bd.py             # Carga el histórico en PostgreSQL y calcula la climatología
 │   ├── eda_historico.py         # Análisis exploratorio y umbrales
 │   └── alineacion_temporal.py   # Cruce sensor vs. histórico
+├── db/init/                 # Esquema SQL: estaciones, lecturas, histórico y climatología
 ├── iot/                     # Firmware del ESP32 e ingesta
 ├── docs/                    # Diagramas y fotos del hardware
 ├── docker-compose.yml       # Base de datos (y próximamente la API)
@@ -89,6 +91,7 @@ docker compose up -d
 # 5. Procesar el histórico (requiere data/Datos_Climaticos_Completos.csv)
 python data_science/etl_satelite.py
 python data_science/corregir_humedad_era5.py
+python data_science/cargar_bd.py       # carga el histórico y genera la climatología
 python data_science/eda_historico.py
 ```
 
@@ -97,7 +100,8 @@ python data_science/eda_historico.py
 - [x] Estructura del repositorio y políticas de seguridad
 - [x] ETL del histórico ERA5 (26 304 registros horarios, 2023–2025)
 - [x] Corrección de la humedad relativa con datos ERA5
-- [ ] Climatología mensual-horaria y carga a PostgreSQL
+- [x] Esquema de base de datos con validaciones físicas
+- [x] Climatología mensual-horaria y carga a PostgreSQL
 - [ ] API REST con FastAPI (recepción y consulta de lecturas)
 - [ ] Firmware del ESP32 enviando datos a la API
 - [ ] Cálculo de la brecha térmica (sensor vs. modelo)
