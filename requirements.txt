@@ -1,0 +1,7 @@
+# Dependencias de Python del proyecto (pipeline de datos e ingesta)
+# Instalar con:  pip install -r requirements.txt
+pandas>=2.2
+numpy>=2.0
+requests>=2.32
+# paho-mqtt 2.x cambió la creación del cliente; el script actual usa la API 1.x
+paho-mqtt>=1.6,<2.0
