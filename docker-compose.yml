@@ -14,6 +14,8 @@ services:
       - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Scripts SQL que crean el esquema la primera vez que se crea la base (solo lectura)
+      - ./db/init:/docker-entrypoint-initdb.d:ro
     # Verifica que la base de datos esté lista antes de que otros servicios se conecten
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]

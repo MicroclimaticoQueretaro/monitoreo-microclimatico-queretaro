@@ -3,5 +3,10 @@
 pandas>=2.2
 numpy>=2.0
 requests>=2.32
+# Conexión a PostgreSQL
+sqlalchemy>=2.0
+psycopg[binary]>=3.2
+# Lectura de credenciales desde el archivo .env
+python-dotenv>=1.0
 # paho-mqtt 2.x cambió la creación del cliente; el script actual usa la API 1.x
 paho-mqtt>=1.6,<2.0
