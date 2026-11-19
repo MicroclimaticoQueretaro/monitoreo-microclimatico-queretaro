@@ -1,0 +1,6 @@
+# Archivos que NO se copian a la imagen Docker
+__pycache__/
+*.pyc
+.pytest_cache/
+tests/
+.env

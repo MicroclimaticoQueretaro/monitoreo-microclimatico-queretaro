@@ -60,6 +60,7 @@ flowchart LR
 │   ├── cargar_bd.py             # Carga el histórico en PostgreSQL y calcula la climatología
 │   ├── eda_historico.py         # Análisis exploratorio y umbrales
 │   └── alineacion_temporal.py   # Cruce sensor vs. histórico
+├── api/                     # API REST (FastAPI) — ver api/README.md
 ├── db/init/                 # Esquema SQL: estaciones, lecturas, histórico y climatología
 ├── iot/                     # Firmware del ESP32 e ingesta
 ├── docs/                    # Diagramas y fotos del hardware
@@ -85,8 +86,8 @@ pip install -r requirements.txt
 # 3. Configurar las variables de entorno
 cp .env.example .env               # y editar .env con contraseñas propias
 
-# 4. Levantar la base de datos
-docker compose up -d
+# 4. Levantar la base de datos y la API
+docker compose up -d --build
 
 # 5. Procesar el histórico (requiere data/Datos_Climaticos_Completos.csv)
 python data_science/etl_satelite.py
@@ -95,6 +96,8 @@ python data_science/cargar_bd.py       # carga el histórico y genera la climato
 python data_science/eda_historico.py
 ```
 
+La API queda disponible en **http://localhost:8000/docs** (documentación interactiva).
+
 ## 🛣️ Hoja de ruta
 
 - [x] Estructura del repositorio y políticas de seguridad
@@ -102,9 +105,10 @@ python data_science/eda_historico.py
 - [x] Corrección de la humedad relativa con datos ERA5
 - [x] Esquema de base de datos con validaciones físicas
 - [x] Climatología mensual-horaria y carga a PostgreSQL
-- [ ] API REST con FastAPI (recepción y consulta de lecturas)
+- [x] API REST con FastAPI: autenticación por token, validación y comparación con la climatología
 - [ ] Firmware del ESP32 enviando datos a la API
-- [ ] Cálculo de la brecha térmica (sensor vs. modelo)
+- [x] Anomalía térmica respecto a la climatología
+- [ ] Brecha térmica respecto al modelo en tiempo real (sensor vs. ERA5/Open-Meteo)
 - [ ] Dashboard web en React
 - [ ] Despliegue en la nube e integración continua
 
