@@ -69,6 +69,37 @@ docker compose ps
 
 ---
 
+## 📡 Probar con el ESP32
+
+La API está cerrada a la red por defecto. Para que el ESP32 envíe datos:
+
+1. **Docker Desktop** abierto (ballena 🐳 quieta).
+2. En el `.env`, abrir la API a la red local:
+   ```
+   API_HOST_BIND=0.0.0.0
+   ```
+3. Aplicar el cambio:
+   ```bash
+   docker compose up -d
+   docker compose ps          # ambos contenedores (healthy)
+   ```
+4. **Verificar la IP** de la computadora con `ipconfig` (IPv4 del adaptador WiFi).
+   Si cambió, actualizar `API_URL_BASE` en `iot/firmware/include/secretos.h` y volver a hacer **Upload**.
+5. **Prueba desde el celular** (misma red WiFi): `http://IP:8000/salud` → `{"estado":"ok",...}`
+6. En el Monitor Serial del ESP32 debe aparecer `registrada (201)`.
+   Si aparece `connection refused`, revisar los pasos 1 a 4: las lecturas esperan en la cola y se envían solas al reconectar.
+
+> **Al terminar**, volver a cerrar la API: `API_HOST_BIND=127.0.0.1` y `docker compose up -d`.
+
+| Error en el Monitor Serial | Causa probable |
+|---|---|
+| `connection refused` | Docker apagado o `API_HOST_BIND=127.0.0.1` |
+| `connection lost` / tiempo agotado | IP incorrecta en `secretos.h` o firewall de Windows |
+| `token invalido (401/403)` | Token regenerado: actualizar `secretos.h` |
+| `Write timeout` al hacer Upload | El Monitor Serial está abierto: cerrarlo antes de cargar |
+
+---
+
 ## 🌙 Al terminar el día
 
 ```bash

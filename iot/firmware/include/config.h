@@ -7,10 +7,22 @@
 #include <Arduino.h>
 
 // ---------- Pines (iguales al montaje de la protoboard) ----------
+// El ESP32 tiene dos buses I2C. Se usa uno para los sensores y otro para el LCD:
+// así los 5 V del adaptador del LCD quedan aislados del bus de los sensores (3.3 V).
 constexpr uint8_t PIN_DHT = 27;            // Datos del DHT11
-constexpr uint8_t PIN_SDA = 25;            // Bus I2C: BME280/BMP280 y BH1750
+constexpr uint8_t PIN_SDA = 25;            // Bus I2C de sensores (Wire1): BME280/BMP280 y BH1750
 constexpr uint8_t PIN_SCL = 26;
+constexpr uint8_t PIN_SDA_LCD = 21;        // Bus I2C del LCD (Wire)
+constexpr uint8_t PIN_SCL_LCD = 22;
 constexpr uint8_t DIRECCION_BH1750 = 0x23; // Pin ADDR del GY-302 desconectado o a GND
+
+// ---------- Pantalla LCD I2C (bus propio en GPIO 21/22) ----------
+constexpr bool USAR_LCD = true;
+constexpr uint8_t LCD_COLUMNAS = 16;
+constexpr uint8_t LCD_FILAS = 2;
+// Direcciones típicas del adaptador PCF8574: se prueban en orden hasta encontrar la pantalla
+constexpr uint8_t LCD_DIRECCIONES[] = {0x27, 0x3F};
+constexpr uint32_t INTERVALO_PAGINA_LCD_MS = 3000;  // cambia de página cada 3 s
 
 // ---------- Estación ----------
 constexpr char CODIGO_ESTACION[] = "QRO-CENTRO-01";

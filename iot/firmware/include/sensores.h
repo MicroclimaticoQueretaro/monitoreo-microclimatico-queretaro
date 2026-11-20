@@ -3,7 +3,7 @@
 
 #include "tipos.h"
 
-// Inicia el bus I2C y detecta los sensores conectados.
+// Inicia el bus I2C de sensores (Wire1) y detecta los sensores conectados.
 void inicializarSensores();
 
 // Lee todos los sensores una vez. Los valores inválidos quedan como NAN.

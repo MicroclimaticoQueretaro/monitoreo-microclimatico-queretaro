@@ -11,9 +11,12 @@
 
 namespace {
 
+// Los sensores I2C usan el segundo bus del ESP32 (Wire1); el primero (Wire) es del LCD
+TwoWire& busSensores = Wire1;
+
 DHT dht(PIN_DHT, DHT11);
 Adafruit_BME280 bme;
-Adafruit_BMP280 bmp(&Wire);
+Adafruit_BMP280 bmp(&Wire1);
 BH1750 medidorLuz;
 
 enum class ChipPresion { Ninguno, BME280, BMP280 };
@@ -34,7 +37,7 @@ void detectarChipPresion() {
     const uint8_t direcciones[] = {0x76, 0x77};
 
     for (uint8_t direccion : direcciones) {
-        if (bme.begin(direccion, &Wire)) {
+        if (bme.begin(direccion, &busSensores)) {
             chipPresion = ChipPresion::BME280;
             // Configuración recomendada por Bosch para estaciones meteorológicas:
             // modo forzado (mide solo cuando se pide) para reducir el autocalentamiento.
@@ -67,13 +70,13 @@ void detectarChipPresion() {
 }  // namespace
 
 void inicializarSensores() {
-    Wire.begin(PIN_SDA, PIN_SCL);
-    Serial.printf("Bus I2C en SDA=GPIO%u, SCL=GPIO%u\n", PIN_SDA, PIN_SCL);
+    busSensores.begin(PIN_SDA, PIN_SCL);
+    Serial.printf("Bus I2C de sensores en SDA=GPIO%u, SCL=GPIO%u\n", PIN_SDA, PIN_SCL);
 
     dht.begin();
     Serial.printf("[OK] DHT11 configurado en GPIO%u\n", PIN_DHT);
 
-    bh1750Disponible = medidorLuz.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, DIRECCION_BH1750, &Wire);
+    bh1750Disponible = medidorLuz.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, DIRECCION_BH1750, &busSensores);
     if (bh1750Disponible) {
         Serial.printf("[OK] BH1750 (GY-302) detectado en 0x%02X\n", DIRECCION_BH1750);
     } else {

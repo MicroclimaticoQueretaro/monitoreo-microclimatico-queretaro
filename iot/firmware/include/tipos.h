@@ -14,6 +14,15 @@ struct Medicion {
     float iluminanciaLux = NAN;
 };
 
+// Estado general de la estación (lo usa la pantalla LCD).
+struct EstadoSistema {
+    bool wifiConectado = false;
+    bool horaValida = false;
+    size_t lecturasPendientes = 0;
+    uint32_t enviosExitosos = 0;
+    time_t ahora = 0;
+};
+
 // Medición promediada lista para enviar, con su marca de tiempo.
 struct Lectura {
     Medicion medicion;
