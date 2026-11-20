@@ -10,11 +10,14 @@ Toma una muestra cada 5 s, envía el **promedio de cada minuto** a la API y guar
 |---|---|---|
 | ESP32 DevKit V1 (30 pines) | Microcontrolador con WiFi | — |
 | DHT11 | Temperatura, humedad | Datos → **GPIO 27** |
-| BME280 / BMP280 (I²C, 0x76 o 0x77) | Temperatura, presión (y humedad si es BME280) | SDA → **GPIO 25**, SCL → **GPIO 26** |
-| GY-302 / BH1750 (I²C, 0x23) | Iluminancia (lux) | SDA → **GPIO 25**, SCL → **GPIO 26** |
+| BME280 / BMP280 (I²C, 0x76 o 0x77) | Temperatura, presión (y humedad si es BME280) | Bus de sensores: SDA → **GPIO 25**, SCL → **GPIO 26** |
+| GY-302 / BH1750 (I²C, 0x23) | Iluminancia (lux) | Bus de sensores: SDA → **GPIO 25**, SCL → **GPIO 26** |
+| LCD 16x2 con adaptador I²C (0x27 o 0x3F) | Muestra mediciones y estado | Bus del LCD: SDA → **GPIO 21**, SCL → **GPIO 22** |
 
-> Todos los sensores se alimentan con **3.3 V** (pin `3V3`) y comparten **GND**.
-> Los pines del ESP32 funcionan a 3.3 V y no toleran 5 V.
+> Los sensores se alimentan con **3.3 V** (pin `3V3`); el LCD con **5 V**. Todos comparten **GND**.
+> Se usan **dos buses I²C** del ESP32 para que el adaptador del LCD (con resistencias pull-up a 5 V)
+> no afecte el bus de los sensores. Los pines del ESP32 trabajan a 3.3 V: para la instalación
+> definitiva se recomienda un **conversor de nivel lógico** entre el ESP32 y el LCD.
 
 El firmware detecta automáticamente si el módulo morado tiene un chip **BME280** o **BMP280**.
 
@@ -28,12 +31,32 @@ iot/firmware/
 │   ├── secretos.h.example    # Plantilla de WiFi y token (copiar a secretos.h)
 │   ├── tipos.h               # Estructuras Medicion y Lectura
 │   ├── sensores.h            # Interfaz de los sensores
+│   ├── pantalla.h            # Interfaz de la pantalla LCD
 │   └── red.h                 # Interfaz de WiFi, NTP y API
 └── src/
     ├── main.cpp              # Ciclo principal no bloqueante y cola de envío
     ├── sensores.cpp          # Lectura, validación de rangos y promedio
+    ├── pantalla.cpp          # Páginas rotativas del LCD (sin bloquear)
     └── red.cpp               # WiFi, hora NTP y envío HTTP con token
 ```
+
+## Pantalla LCD
+
+La pantalla rota cada 3 s entre tres páginas, **sin detener** la medición ni el envío:
+
+| Página | Línea 1 | Línea 2 |
+|---|---|---|
+| Clima | `Temp: 24.6°C` | `Hum:  38.0 %` |
+| Presión y luz | `Pres:823.5hPa` | `Luz:  7.5 lx` |
+| Estado | `21:49  WiFi:OK` | `Env:123 Pend:0` |
+
+- Muestra la **muestra más reciente** (se actualiza cada 5 s); a la API se envía el **promedio** del minuto.
+- `Env` = lecturas registradas en la API desde el encendido; `Pend` = lecturas en cola esperando conexión.
+- Si la pantalla no se detecta, la estación sigue funcionando normalmente.
+- Se desactiva con `USAR_LCD = false` en `config.h`.
+
+> **Importante:** la biblioteca del LCD usa siempre el bus `Wire` y llama a `Wire.begin()` sin pines.
+> Por eso el firmware inicia `Wire` en GPIO 21/22 antes de crear la pantalla, y los sensores usan `Wire1`.
 
 ## Configuración
 
@@ -54,7 +77,8 @@ constexpr bool ENVIAR_A_API = false;
 
 ## Compilar y cargar
 
-En VS Code con PlatformIO, abrir la carpeta `iot/firmware/` (File → Open Folder) y usar la barra inferior:
+En VS Code, abrir el archivo `monitoreo-microclimatico-queretaro.code-workspace` de la raíz
+(**File → Open Workspace from File**) para que PlatformIO reconozca el firmware, y usar la barra inferior:
 **✓ Build** → **→ Upload** → **🔌 Serial Monitor**.
 
 ## Salida esperada en el Monitor Serial

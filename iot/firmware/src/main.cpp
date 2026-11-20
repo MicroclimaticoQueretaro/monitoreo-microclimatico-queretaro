@@ -1,19 +1,23 @@
 // =====================================================================
 // Estación meteorológica IoT — Monitoreo Microclimático de Querétaro
-// ESP32 DevKit V1 + DHT11 + BME280/BMP280 + BH1750 (GY-302)
+// ESP32 DevKit V1 + DHT11 + BME280/BMP280 + BH1750 (GY-302) + LCD 16x2 I2C
 //
 // Flujo: muestra cada 5 s -> promedio cada 60 s -> cola -> envío HTTP a la API.
 // Si se pierde la conexión, las lecturas esperan en la cola y se envían después.
+// La pantalla LCD rota entre clima, presión/luz y estado cada 3 s, sin detener nada.
 // =====================================================================
 #include <Arduino.h>
 
 #include "config.h"
+#include "pantalla.h"
 #include "red.h"
 #include "sensores.h"
 
 namespace {
 
 Promediador promediador;
+Medicion ultimaMuestra;         // muestra más reciente (la muestra la pantalla)
+uint32_t enviosExitosos = 0;
 uint32_t ultimoMuestreo = 0;
 uint32_t ultimoPromedio = 0;
 uint32_t ultimoIntentoEnvio = 0;
@@ -70,7 +74,8 @@ void imprimirLectura(const Lectura& lectura, uint16_t muestras) {
 void tomarMuestraSiCorresponde() {
     if (millis() - ultimoMuestreo >= INTERVALO_MUESTREO_MS) {
         ultimoMuestreo = millis();
-        promediador.agregar(leerSensores());
+        ultimaMuestra = leerSensores();
+        promediador.agregar(ultimaMuestra);
     }
 }
 
@@ -115,6 +120,10 @@ void enviarPendientesSiCorresponde() {
 
     switch (resultado) {
         case ResultadoEnvio::Exito:
+            enviosExitosos++;
+            quitarPrimera();
+            esperarTrasFallo = false;
+            break;
         case ResultadoEnvio::Duplicado:
         case ResultadoEnvio::ErrorDatos:  // reintentar no la corregiría
             quitarPrimera();
@@ -124,6 +133,16 @@ void enviarPendientesSiCorresponde() {
             esperarTrasFallo = true;
             break;
     }
+}
+
+void actualizarPantallaSiCorresponde() {
+    EstadoSistema estado;
+    estado.wifiConectado = ENVIAR_A_API && wifiConectado();
+    estado.horaValida = horaValida();
+    estado.lecturasPendientes = cantidadEnCola;
+    estado.enviosExitosos = enviosExitosos;
+    estado.ahora = time(nullptr);
+    actualizarPantalla(ultimaMuestra, estado);
 }
 
 }  // namespace
@@ -138,9 +157,12 @@ void setup() {
     Serial.println("=========================================");
 
     inicializarSensores();
+    inicializarPantalla();
 
     if (ENVIAR_A_API) {
+        mostrarMensajePantalla("Conectando WiFi", "...");
         iniciarWifi();
+        mostrarMensajePantalla("Sincronizando", "hora (NTP)...");
         iniciarHora();
     } else {
         Serial.println("[MODO PRUEBA] Envio a la API desactivado (ENVIAR_A_API = false).");
@@ -159,4 +181,5 @@ void loop() {
     tomarMuestraSiCorresponde();
     cerrarPromedioSiCorresponde();
     enviarPendientesSiCorresponde();
+    actualizarPantallaSiCorresponde();
 }

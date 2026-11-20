@@ -1,0 +1,16 @@
+{
+    // Espacio de trabajo de VS Code con dos carpetas:
+    //  - la raíz del proyecto (Python, API, Docker)
+    //  - el firmware, para que PlatformIO lo reconozca y configure el autocompletado de C++
+    // Abrir con: File -> Open Workspace from File...
+    "folders": [
+        { "name": "Proyecto", "path": "." },
+        { "name": "Firmware ESP32", "path": "iot/firmware" }
+    ],
+    "settings": {
+        "files.exclude": {
+            "**/__pycache__": true,
+            "**/.pytest_cache": true
+        }
+    }
+}
