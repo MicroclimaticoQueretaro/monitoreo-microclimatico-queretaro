@@ -98,6 +98,8 @@ python data_science/eda_historico.py
 
 La API queda disponible en **http://localhost:8000/docs** (documentación interactiva).
 
+📘 Para el día a día del equipo (Git, Docker, venv, pruebas), ver la [guía de flujo de trabajo](docs/flujo-de-trabajo.md).
+
 ## 🛣️ Hoja de ruta
 
 - [x] Estructura del repositorio y políticas de seguridad
@@ -120,9 +122,9 @@ La API queda disponible en **http://localhost:8000/docs** (documentación intera
 
 | Nombre | Rol |
 |---|---|
-| Maria Luísa | Ciencia de datos · IoT |
-| _Integrante 2_ | _Rol_ |
-| _Integrante 3_ | _Rol_ |
+| Maria Luísa | Ciencia de datos · Big Data · IoT |
+| Alexa | Ciencia de datos · Big Data · IoT |
+| Kevin | Ciencia de datos · Big Data · IoT |
 
 ## 📄 Licencia
 
