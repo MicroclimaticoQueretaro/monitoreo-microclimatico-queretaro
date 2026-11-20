@@ -34,9 +34,11 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
-    # Solo accesible desde esta computadora. En la Fase 3 se abrirá a la red local para el ESP32
+    # Por defecto solo es accesible desde esta computadora (127.0.0.1).
+    # Para que el ESP32 la alcance por WiFi, poner API_HOST_BIND=0.0.0.0 en el .env
+    # (solo en redes de confianza: la API queda visible para toda la red local).
     ports:
-      - "127.0.0.1:8000:8000"
+      - "${API_HOST_BIND:-127.0.0.1}:8000:8000"
     # La API espera a que la base de datos esté lista (healthcheck) antes de arrancar
     depends_on:
       db:

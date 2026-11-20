@@ -1,0 +1,5 @@
+# Archivos generados por PlatformIO al compilar
+.pio/
+.vscode/
+# Secretos del firmware (WiFi y token): NUNCA subir a GitHub
+include/secretos.h

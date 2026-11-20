@@ -25,7 +25,7 @@ Un sistema de tres capas:
 
 ```mermaid
 flowchart LR
-    A["ESP32<br/>DHT11 · BMP280 · GY-302"] -- "JSON por HTTPS" --> B["API<br/>FastAPI"]
+    A["ESP32<br/>DHT11 · BME280 · GY-302"] -- "JSON por HTTPS" --> B["API<br/>FastAPI"]
     B --> C[("PostgreSQL<br/>TimescaleDB")]
     D["Histórico ERA5<br/>2023–2025"] -- "ETL en Python" --> C
     C --> B
@@ -45,10 +45,10 @@ flowchart LR
 |---|---|---|
 | ESP32 | Microcontrolador con WiFi | — |
 | DHT11 | Temperatura / humedad relativa | ±2 °C / ±5 % HR |
-| BMP280 | Presión atmosférica (y temperatura de referencia) | ±1 hPa / ±1 °C |
+| BME280 / BMP280 | Presión, temperatura de referencia (y humedad si es BME280) | ±1 hPa / ±1 °C / ±3 % HR |
 | GY-302 (BH1750) | Iluminancia (lux) | — |
 
-> ⚠️ **Limitaciones conocidas:** la precisión del DHT11 (±2 °C) es del mismo orden que el efecto que se quiere medir, por eso se reporta siempre la incertidumbre y se usa la temperatura del BMP280 como referencia cruzada. El BH1750 mide luz visible en lux, no radiación solar en W/m²; la conversión (~lux ÷ 120) es una aproximación válida solo para luz solar directa.
+> ⚠️ **Limitaciones conocidas:** la precisión del DHT11 (±2 °C) es del mismo orden que el efecto que se quiere medir, por eso se reporta siempre la incertidumbre y se usa la temperatura del BME280 como referencia cruzada. El BH1750 mide luz visible en lux, no radiación solar en W/m²; la conversión (~lux ÷ 120) es una aproximación válida solo para luz solar directa.
 
 ## 🗂️ Estructura del repositorio
 
@@ -62,7 +62,7 @@ flowchart LR
 │   └── alineacion_temporal.py   # Cruce sensor vs. histórico
 ├── api/                     # API REST (FastAPI) — ver api/README.md
 ├── db/init/                 # Esquema SQL: estaciones, lecturas, histórico y climatología
-├── iot/                     # Firmware del ESP32 e ingesta
+├── iot/firmware/            # Firmware del ESP32 (PlatformIO) — ver iot/firmware/README.md
 ├── docs/                    # Diagramas y fotos del hardware
 ├── docker-compose.yml       # Base de datos (y próximamente la API)
 ├── .env.example             # Plantilla de variables de entorno
@@ -98,6 +98,8 @@ python data_science/eda_historico.py
 
 La API queda disponible en **http://localhost:8000/docs** (documentación interactiva).
 
+📘 Para el día a día del equipo (Git, Docker, venv, pruebas), ver la [guía de flujo de trabajo](docs/flujo-de-trabajo.md).
+
 ## 🛣️ Hoja de ruta
 
 - [x] Estructura del repositorio y políticas de seguridad
@@ -120,9 +122,9 @@ La API queda disponible en **http://localhost:8000/docs** (documentación intera
 
 | Nombre | Rol |
 |---|---|
-| Maria Luísa | Ciencia de datos · IoT |
-| _Integrante 2_ | _Rol_ |
-| _Integrante 3_ | _Rol_ |
+| Maria Luísa | Ciencia de datos · Big Data · IoT |
+| Alexa | Ciencia de datos · Big Data · IoT |
+| Kevin | Ciencia de datos · Big Data · IoT |
 
 ## 📄 Licencia
 
