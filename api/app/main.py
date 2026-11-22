@@ -12,7 +12,7 @@ from sqlalchemy.engine import Connection
 
 from app.config import obtener_configuracion
 from app.db import obtener_conexion
-from app.rutas import comparacion, estaciones, lecturas
+from app.rutas import brecha, comparacion, estaciones, lecturas
 
 PREFIJO_API = "/api/v1"  # versionar la API permite cambiarla en el futuro sin romper el ESP32
 
@@ -20,9 +20,10 @@ app = FastAPI(
     title="API Monitoreo Microclimático de Querétaro",
     description=(
         "Recibe lecturas de la estación IoT (ESP32) y las compara con la climatología "
-        "histórica del reanálisis ERA5-Land (2023-2025)."
+        "histórica del reanálisis ERA5-Land (2023-2025) y con el modelo meteorológico en "
+        "tiempo real (Open-Meteo) para calcular la brecha térmica (isla de calor urbana)."
     ),
-    version="0.1.0",
+    version="0.2.0",
 )
 
 # CORS: solo los orígenes configurados (el dashboard) pueden consultar la API desde un navegador
@@ -36,6 +37,7 @@ app.add_middleware(
 app.include_router(estaciones.router, prefix=PREFIJO_API)
 app.include_router(lecturas.router, prefix=PREFIJO_API)
 app.include_router(comparacion.router, prefix=PREFIJO_API)
+app.include_router(brecha.router, prefix=PREFIJO_API)
 
 
 @app.get("/salud", tags=["Sistema"], summary="Verificar que la API y la base de datos respondan")
