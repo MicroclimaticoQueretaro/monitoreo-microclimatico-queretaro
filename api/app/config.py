@@ -24,6 +24,11 @@ class Configuracion(BaseSettings):
     # Tolerancia para lecturas con hora en el futuro (relojes desincronizados)
     tolerancia_futuro_minutos: int = 5
 
+    # Modelo meteorológico de referencia (Open-Meteo: gratuito y sin llave para uso no comercial)
+    url_modelo: str = "https://api.open-meteo.com/v1/forecast"
+    tiempo_espera_modelo_s: float = 30.0
+    intervalo_sincronizacion_minutos: int = 30
+
     @property
     def url_base_datos(self) -> URL:
         # URL.create escapa caracteres especiales de la contraseña de forma segura

@@ -17,6 +17,14 @@ CODIGOS_PRUEBA = ("PRUEBA-01", "PRUEBA-02")
 
 
 def _borrar_datos_de_prueba(conexion) -> None:
+    # Primero las tablas que dependen de estaciones (llaves foráneas), luego las estaciones
+    conexion.execute(
+        text(
+            "DELETE FROM modelo_horario WHERE estacion_id IN "
+            "(SELECT id FROM estaciones WHERE codigo = ANY(:codigos))"
+        ),
+        {"codigos": list(CODIGOS_PRUEBA)},
+    )
     conexion.execute(
         text(
             "DELETE FROM lecturas WHERE estacion_id IN "
@@ -39,8 +47,8 @@ def tokens() -> dict[str, str]:
         for codigo, token in tokens_generados.items():
             conexion.execute(
                 text(
-                    "INSERT INTO estaciones (codigo, nombre, latitud, longitud, token_hash) "
-                    "VALUES (:codigo, 'Estación de prueba', 20.59, -100.39, :hash)"
+                    "INSERT INTO estaciones (codigo, nombre, latitud, longitud, altitud_m, token_hash) "
+                    "VALUES (:codigo, 'Estación de prueba', 20.59, -100.39, 1820, :hash)"
                 ),
                 {"codigo": codigo, "hash": calcular_hash(token)},
             )

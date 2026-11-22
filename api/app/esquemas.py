@@ -82,3 +82,33 @@ class Comparacion(BaseModel):
     )
     humedad_sensor: float | None
     humedad_normal: float | None
+
+
+class BrechaHoraria(BaseModel):
+    """Comparación hora por hora entre el sensor y el modelo meteorológico (Open-Meteo)."""
+
+    hora: datetime = Field(description="Hora en punto (UTC) a la que corresponde la comparación.")
+    lecturas_promediadas: int = Field(description="Lecturas del sensor usadas en el promedio.")
+
+    temperatura_sensor: float | None
+    temperatura_modelo: float | None
+    brecha_termica: float | None = Field(
+        description="Sensor menos modelo (°C). Positivo = la calle está más caliente que la región: "
+        "indicador de isla de calor urbana."
+    )
+
+    humedad_sensor: float | None
+    humedad_modelo: float | None
+    diferencia_humedad: float | None
+
+    presion_estacion_sensor: float | None = Field(description="Presión medida en la estación (hPa).")
+    presion_nivel_mar_sensor: float | None = Field(
+        description="Presión del sensor reducida al nivel del mar (hPa), comparable con el modelo."
+    )
+    presion_nivel_mar_modelo: float | None
+    diferencia_presion: float | None
+
+    radiacion_estimada_sensor: float | None = Field(
+        description="ESTIMACIÓN de radiación solar (W/m²) a partir de lux (÷120). Aproximada."
+    )
+    radiacion_modelo: float | None = Field(description="Radiación solar del modelo (W/m²).")

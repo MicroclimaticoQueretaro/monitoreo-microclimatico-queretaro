@@ -13,6 +13,7 @@ Documentación interactiva (con la API corriendo): **http://localhost:8000/docs*
 | `POST` | `/api/v1/lecturas` | Token | Registra una lectura del sensor |
 | `GET` | `/api/v1/estaciones/{codigo}/lecturas?horas=24` | — | Lecturas recientes |
 | `GET` | `/api/v1/estaciones/{codigo}/comparacion?horas=24` | — | Lecturas vs. climatología (anomalía) |
+| `GET` | `/api/v1/estaciones/{codigo}/brecha?horas=24` | — | Brecha térmica hora por hora: sensor vs. modelo meteorológico |
 
 ## Contrato de la lectura (lo que envía el ESP32)
 
@@ -41,6 +42,25 @@ Content-Type: application/json
 | `409` | Ya existe una lectura en ese instante |
 | `422` | Datos inválidos (fuera de rango, sin zona horaria, en el futuro o campos desconocidos) |
 
+## Dos comparaciones distintas
+
+| Endpoint | Compara contra | Responde a |
+|---|---|---|
+| `/comparacion` | **Climatología**: promedio ERA5-Land 2023–2025 para ese mes y hora | ¿Hoy está más caliente **de lo normal** para esta época? |
+| `/brecha` | **Modelo meteorológico** (Open-Meteo) en la **misma hora** | ¿Cuánto más caliente está **la calle** que la región **ahora mismo**? → isla de calor |
+
+### Cómo se calcula la brecha (`/brecha`)
+
+- **Temperatura y humedad:** promedio de las lecturas de ±30 min alrededor de cada hora en punto,
+  porque el modelo entrega valores instantáneos. El modelo se pide **ajustado a la altitud de la
+  estación**, así la brecha no incluye el efecto de la diferencia de altura.
+- **Presión:** la presión de la estación se **reduce al nivel del mar** (fórmula barométrica) para
+  compararla con la presión a nivel del mar del modelo. Sirve como control de calibración del BME280.
+- **Radiación:** el BH1750 mide luz en **lux**, no radiación. Se **estima** con lux ÷ 120 (válido solo
+  con sol directo) y se compara con la hora anterior, porque el modelo entrega el promedio horario.
+
+El servicio `sincronizador` descarga el modelo cada 30 minutos y lo guarda en la tabla `modelo_horario`.
+
 ## Seguridad
 
 - Cada estación tiene un **token aleatorio de 256 bits**; en la base solo se guarda su **hash SHA-256**.
@@ -57,4 +77,5 @@ pip install -r requirements-dev.txt
 uvicorn app.main:app --reload        # API en http://localhost:8000
 python -m pytest                     # pruebas (requiere la base levantada)
 python -m scripts.crear_token QRO-CENTRO-01   # genera el token del ESP32
+python -m scripts.sincronizar_modelo          # descarga el modelo una vez (manual)
 ```
