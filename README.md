@@ -37,7 +37,9 @@ flowchart LR
 | Comparación | Pregunta que responde |
 |---|---|
 | **Sensor vs. climatología** (promedio de 3 años para el mismo mes y hora) | ¿Hoy está más caliente de lo normal para esta época? |
-| **Sensor vs. modelo en el mismo instante** | ¿Cuántos grados más caliente está la calle que la región en este momento? (indicador de isla de calor) |
+| **Sensor vs. modelo en el mismo instante** (Open-Meteo, ajustado a la altitud de la estación) | ¿Cuántos grados más caliente está la calle que la región en este momento? (**brecha térmica**, indicador de isla de calor) |
+
+Además, la presión de la estación se reduce al nivel del mar para poder compararla con el modelo, y la radiación solar se **estima** a partir de la iluminancia (lux ÷ 120), indicando siempre que es una aproximación. Detalles en [api/README.md](api/README.md).
 
 ## 🔧 Hardware
 
@@ -108,9 +110,9 @@ La API queda disponible en **http://localhost:8000/docs** (documentación intera
 - [x] Esquema de base de datos con validaciones físicas
 - [x] Climatología mensual-horaria y carga a PostgreSQL
 - [x] API REST con FastAPI: autenticación por token, validación y comparación con la climatología
-- [ ] Firmware del ESP32 enviando datos a la API
+- [x] Firmware del ESP32 enviando datos a la API, con pantalla LCD
 - [x] Anomalía térmica respecto a la climatología
-- [ ] Brecha térmica respecto al modelo en tiempo real (sensor vs. ERA5/Open-Meteo)
+- [x] Brecha térmica respecto al modelo en tiempo real (Open-Meteo), presión a nivel del mar y radiación estimada
 - [ ] Dashboard web en React
 - [ ] Despliegue en la nube e integración continua
 
