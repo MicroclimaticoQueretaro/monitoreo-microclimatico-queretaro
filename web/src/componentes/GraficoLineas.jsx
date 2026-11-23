@@ -1,40 +1,35 @@
-// Gráfico de líneas para comparar series en el tiempo (sensor, modelo, normal histórico).
+// Gráfico de líneas para comparar series en el tiempo.
 import {
   CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
 import { diaHoraLocal, horaLocal, numero } from '../formato'
 
+const estiloEje = { fill: 'var(--texto-secundario)', fontSize: 12 }
+
 // series: [{ clave, nombre, color, punteada }]
-export default function GraficoLineas({ datos, series, unidad }) {
+// claveX: campo con la fecha ("hora" para datos por hora, "ts" para lecturas por minuto)
+// formatoEje: cómo se escribe la fecha en el eje (hora por defecto; día para periodos largos)
+export default function GraficoLineas({ datos, series, unidad, claveX = 'hora', altura = 300, decimales = 1, formatoEje = horaLocal }) {
+  const variasSeries = series.length > 1
   return (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height={altura}>
       <LineChart data={datos} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
         <CartesianGrid stroke="var(--linea-grilla)" vertical={false} />
-        <XAxis
-          dataKey="hora"
-          tickFormatter={horaLocal}
-          minTickGap={40}
-          tick={{ fill: 'var(--texto-secundario)', fontSize: 12 }}
-          stroke="var(--linea-eje)"
-        />
-        <YAxis
-          unit={unidad}
-          width={60}
-          domain={['auto', 'auto']}
-          tick={{ fill: 'var(--texto-secundario)', fontSize: 12 }}
-          stroke="var(--linea-eje)"
-        />
+        <XAxis dataKey={claveX} tickFormatter={formatoEje} minTickGap={40} tick={estiloEje} stroke="var(--linea-eje)" />
+        <YAxis unit={unidad} width={64} domain={['auto', 'auto']} tick={estiloEje} stroke="var(--linea-eje)" />
         <Tooltip
           labelFormatter={diaHoraLocal}
-          formatter={(valor, nombre) => [`${numero(valor)} ${unidad}`, nombre]}
-          contentStyle={{ background: 'var(--superficie)', border: '1px solid var(--borde)', borderRadius: 8 }}
+          formatter={(valor, nombre) => [`${numero(valor, decimales)} ${unidad}`, nombre]}
+          contentStyle={{ background: '#fff', border: '1px solid var(--borde)', borderRadius: 8 }}
         />
-        {/* Leyenda en el mismo orden que las series; el texto usa el color de texto, no el de la serie */}
-        <Legend
-          itemSorter={null}
-          wrapperStyle={{ fontSize: 13 }}
-          formatter={(nombre) => <span style={{ color: 'var(--texto-secundario)' }}>{nombre}</span>}
-        />
+        {/* La leyenda solo hace falta con 2+ series; con una, el título del panel ya la nombra */}
+        {variasSeries && (
+          <Legend
+            itemSorter={null}
+            wrapperStyle={{ fontSize: 13 }}
+            formatter={(nombre) => <span style={{ color: 'var(--texto-secundario)' }}>{nombre}</span>}
+          />
+        )}
         {series.map((serie) => (
           <Line
             key={serie.clave}
@@ -45,7 +40,7 @@ export default function GraficoLineas({ datos, series, unidad }) {
             strokeWidth={2}
             strokeDasharray={serie.punteada ? '6 4' : undefined}
             dot={false}
-            activeDot={{ r: 5, strokeWidth: 2, stroke: 'var(--superficie)' }}
+            activeDot={{ r: 5, strokeWidth: 2, stroke: '#fff' }}
             connectNulls={false}
             isAnimationActive={false}
           />
