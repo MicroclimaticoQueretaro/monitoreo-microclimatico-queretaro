@@ -128,6 +128,9 @@ def test_brecha_termica_por_hora(cliente, tokens, cliente_simulado):
     assert fila["diferencia_humedad"] == -5.0             # 50 - 55
     assert fila["presion_nivel_mar_sensor"] == pytest.approx(1011, abs=3)
     assert fila["radiacion_estimada_sensor"] == 10.0      # 1200 lux / 120
+    # Con la climatología cargada, la anomalía es sensor menos normal
+    if fila["temperatura_normal"] is not None:
+        assert fila["anomalia_climatologica"] == round(23.0 - fila["temperatura_normal"], 2)
 
 
 def test_brecha_estacion_inexistente(cliente):

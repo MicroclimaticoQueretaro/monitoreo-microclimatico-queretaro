@@ -40,7 +40,8 @@ constexpr uint32_t INTERVALO_MUESTREO_MS = 5000;
 constexpr uint32_t INTERVALO_ENVIO_MS = 60000;
 constexpr uint32_t INTERVALO_REINTENTO_WIFI_MS = 30000;
 constexpr uint32_t ESPERA_TRAS_FALLO_ENVIO_MS = 15000;
-constexpr uint16_t TIEMPO_ESPERA_HTTP_MS = 10000;
+// 20 s: en la nube gratuita la API puede tardar en responder si estaba dormida
+constexpr uint16_t TIEMPO_ESPERA_HTTP_MS = 20000;
 
 // Lecturas guardadas en memoria si no hay conexión (60 = 1 hora a 1 lectura/min).
 // Cuando la cola se llena, se descarta la más antigua.

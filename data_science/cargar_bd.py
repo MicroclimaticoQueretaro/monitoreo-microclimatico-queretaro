@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pandas as pd
 from dotenv import load_dotenv
-from sqlalchemy import URL, create_engine, text
+from sqlalchemy import URL, create_engine, make_url, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import OperationalError
 
@@ -38,8 +38,16 @@ COLUMNAS_BD = {
 
 
 def crear_motor() -> Engine:
-    """Crea la conexión a PostgreSQL leyendo las credenciales del archivo .env."""
+    """Crea la conexión a PostgreSQL.
+
+    Si existe DATABASE_URL (base en la nube, ej. Neon) se usa esa; si no, se leen
+    las credenciales locales POSTGRES_* del archivo .env.
+    """
     load_dotenv()
+    if os.getenv("DATABASE_URL"):
+        url_nube = make_url(os.environ["DATABASE_URL"]).set(drivername="postgresql+psycopg")
+        print(f"Conectando a la base en la nube: {url_nube.host}")
+        return create_engine(url_nube)
     requeridas = ["POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB"]
     faltantes = [var for var in requeridas if not os.getenv(var)]
     if faltantes:

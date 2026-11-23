@@ -20,4 +20,6 @@ RUN useradd --create-home --shell /usr/sbin/nologin api
 USER api
 
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# El puerto se lee de la variable PORT (la define Render en la nube); en local usa 8000.
+# --proxy-headers: detrás del proxy HTTPS de la nube, respeta el protocolo y la IP originales.
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]

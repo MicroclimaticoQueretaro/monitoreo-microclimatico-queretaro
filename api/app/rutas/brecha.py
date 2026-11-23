@@ -48,10 +48,16 @@ SELECT
     m.temperatura::FLOAT        AS temperatura_modelo,
     m.humedad::FLOAT            AS humedad_modelo,
     m.presion_nivel_mar::FLOAT  AS presion_nivel_mar_modelo,
-    m.radiacion_wm2::FLOAT      AS radiacion_modelo
+    m.radiacion_wm2::FLOAT      AS radiacion_modelo,
+    c.temperatura_media::FLOAT  AS temperatura_normal,
+    c.humedad_media::FLOAT      AS humedad_normal
 FROM sensor_instantaneo s
 LEFT JOIN sensor_radiacion r ON r.hora = s.hora
 LEFT JOIN modelo_horario m   ON m.estacion_id = :estacion_id AND m.hora = s.hora
+-- Climatología (lo "normal" de 2023-2025) para el mismo mes y hora en hora local de Querétaro
+LEFT JOIN climatologia c
+       ON c.mes  = EXTRACT(MONTH FROM s.hora AT TIME ZONE 'America/Mexico_City')
+      AND c.hora = EXTRACT(HOUR  FROM s.hora AT TIME ZONE 'America/Mexico_City')
 ORDER BY s.hora DESC
 """
 
@@ -89,6 +95,9 @@ def calcular_brecha(
                 temperatura_sensor=temperatura,
                 temperatura_modelo=fila["temperatura_modelo"],
                 brecha_termica=diferencia(temperatura, fila["temperatura_modelo"]),
+                temperatura_normal=fila["temperatura_normal"],
+                anomalia_climatologica=diferencia(temperatura, fila["temperatura_normal"]),
+                humedad_normal=fila["humedad_normal"],
                 humedad_sensor=humedad,
                 humedad_modelo=fila["humedad_modelo"],
                 diferencia_humedad=diferencia(humedad, fila["humedad_modelo"]),

@@ -1,0 +1,30 @@
+# Blueprint de Render: crea la API y el dashboard en la nube a partir de este repositorio.
+# Uso: Render -> New -> Blueprint -> elegir el repositorio. Los valores con "sync: false"
+# se piden en pantalla (son secretos o dependen de la URL que asigne Render).
+services:
+  # API (FastAPI) en Docker. También descarga el modelo meteorológico cada 30 min.
+  - type: web
+    name: microclima-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./api/Dockerfile
+    dockerContext: ./api
+    healthCheckPath: /salud
+    envVars:
+      - key: DATABASE_URL          # cadena de conexión de Neon (secreta)
+        sync: false
+      - key: SINCRONIZAR_EN_API    # el plan gratuito permite un solo servicio: la API sincroniza
+        value: "true"
+      - key: ORIGENES_CORS         # ej.: ["https://microclima-dashboard.onrender.com"]
+        sync: false
+
+  # Dashboard (React) como sitio estático: gratuito y sin "dormirse".
+  - type: web
+    name: microclima-dashboard
+    runtime: static
+    rootDir: web
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL          # ej.: https://microclima-api.onrender.com
+        sync: false

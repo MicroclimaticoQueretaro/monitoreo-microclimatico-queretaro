@@ -67,5 +67,18 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # Dashboard React: se compila y se sirve con nginx en http://localhost:5173
+  web:
+    build:
+      context: ./web
+      args:
+        VITE_API_URL: http://localhost:8000
+    container_name: microclima_web
+    ports:
+      - "127.0.0.1:5173:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
 volumes:
   postgres_data:
