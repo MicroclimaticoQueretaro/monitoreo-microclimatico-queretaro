@@ -5,7 +5,7 @@ import {
 import { COLORES } from '../colores'
 import { conSigno, diaHoraLocal, horaLocal } from '../formato'
 
-export default function GraficoBrecha({ datos }) {
+export default function GraficoBrecha({ datos, formatoEje = horaLocal }) {
   const conDato = datos.filter((fila) => fila.brecha_termica !== null)
   return (
     <ResponsiveContainer width="100%" height={260}>
@@ -13,7 +13,7 @@ export default function GraficoBrecha({ datos }) {
         <CartesianGrid stroke="var(--linea-grilla)" vertical={false} />
         <XAxis
           dataKey="hora"
-          tickFormatter={horaLocal}
+          tickFormatter={formatoEje}
           minTickGap={40}
           tick={{ fill: 'var(--texto-secundario)', fontSize: 12 }}
           stroke="var(--linea-eje)"
@@ -28,7 +28,7 @@ export default function GraficoBrecha({ datos }) {
         <Tooltip
           labelFormatter={diaHoraLocal}
           formatter={(valor) => [`${conSigno(valor)} °C`, 'Brecha térmica']}
-          contentStyle={{ background: 'var(--superficie)', border: '1px solid var(--borde)', borderRadius: 8 }}
+          contentStyle={{ background: '#fff', border: '1px solid var(--borde)', borderRadius: 8 }}
           cursor={{ fill: 'var(--linea-grilla)' }}
         />
         <Bar dataKey="brecha_termica" radius={[4, 4, 0, 0]} isAnimationActive={false}>

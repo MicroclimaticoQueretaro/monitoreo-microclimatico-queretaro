@@ -9,6 +9,8 @@ const formatoDiaHora = new Intl.DateTimeFormat('es-MX', {
 })
 
 export const horaLocal = (fecha) => formatoHora.format(new Date(fecha))
+const formatoDia = new Intl.DateTimeFormat('es-MX', { timeZone: ZONA_HORARIA, day: 'numeric', month: 'short' })
+export const diaLocal = (fecha) => formatoDia.format(new Date(fecha))
 export const diaHoraLocal = (fecha) => formatoDiaHora.format(new Date(fecha))
 
 // Número con decimales fijos, o "—" si no hay dato
