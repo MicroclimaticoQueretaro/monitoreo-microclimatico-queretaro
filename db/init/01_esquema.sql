@@ -116,5 +116,5 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_climatologia_mes_hora ON climatologia (mes
 -- ---------------------------------------------------------------------
 -- TODO: reemplazar las coordenadas por la ubicación real de instalación del ESP32.
 INSERT INTO estaciones (codigo, nombre, latitud, longitud, altitud_m)
-VALUES ('QRO-CENTRO-01', 'Centro Histórico de Querétaro', 20.59300, -100.39200, 1820)
+VALUES ('QRO-CENTRO-01', 'Centro Histórico de Querétaro', 20.59065, -100.39132, 1824.9)
 ON CONFLICT (codigo) DO NOTHING;
