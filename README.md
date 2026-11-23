@@ -1,4 +1,4 @@
-# 🌡️ Monitoreo Microclimático de Querétaro
+# Monitoreo Microclimático de Querétaro
 
 > Estación meteorológica IoT de bajo costo que mide, en tiempo real, el microclima del centro histórico de Querétaro y lo compara con 3 años de datos de reanálisis climático (ERA5) para detectar el efecto de **isla de calor urbana**.
 
@@ -11,11 +11,11 @@
 
 ---
 
-## 📌 El problema
+## El problema
 
 Los datos climáticos regionales (satélites y modelos de reanálisis) representan áreas de decenas de kilómetros. Dentro de una ciudad, el asfalto, los edificios y la falta de vegetación pueden calentar el aire varios grados por encima de lo que esos modelos indican. **¿Cuánto más caliente está realmente el centro de Querétaro?**
 
-## 💡 La solución
+## La solución
 
 Un sistema de tres capas:
 
@@ -32,7 +32,7 @@ flowchart LR
     B --> E["Dashboard web<br/>React"]
 ```
 
-## 📊 Metodología de comparación
+## Metodología de comparación
 
 | Comparación | Pregunta que responde |
 |---|---|
@@ -41,7 +41,7 @@ flowchart LR
 
 Además, la presión de la estación se reduce al nivel del mar para poder compararla con el modelo, y la radiación solar se **estima** a partir de la iluminancia (lux ÷ 120), indicando siempre que es una aproximación. Detalles en [api/README.md](api/README.md).
 
-## 🔧 Hardware
+## Hardware
 
 | Componente | Variable | Precisión aproximada |
 |---|---|---|
@@ -50,9 +50,9 @@ Además, la presión de la estación se reduce al nivel del mar para poder compa
 | BME280 / BMP280 | Presión, temperatura de referencia (y humedad si es BME280) | ±1 hPa / ±1 °C / ±3 % HR |
 | GY-302 (BH1750) | Iluminancia (lux) | — |
 
-> ⚠️ **Limitaciones conocidas:** la precisión del DHT11 (±2 °C) es del mismo orden que el efecto que se quiere medir, por eso se reporta siempre la incertidumbre y se usa la temperatura del BME280 como referencia cruzada. El BH1750 mide luz visible en lux, no radiación solar en W/m²; la conversión (~lux ÷ 120) es una aproximación válida solo para luz solar directa.
+>  **Limitaciones conocidas:** la precisión del DHT11 (±2 °C) es del mismo orden que el efecto que se quiere medir, por eso se reporta siempre la incertidumbre y se usa la temperatura del BME280 como referencia cruzada. El BH1750 mide luz visible en lux, no radiación solar en W/m²; la conversión (~lux ÷ 120) es una aproximación válida solo para luz solar directa.
 
-## 🗂️ Estructura del repositorio
+## Estructura del repositorio
 
 ```
 ├── data/                    # Datos crudos (no se suben a GitHub)
@@ -71,7 +71,7 @@ Además, la presión de la estación se reduce al nivel del mar para poder compa
 └── requirements.txt
 ```
 
-## 🚀 Cómo ejecutarlo
+## Cómo ejecutarlo
 
 **Requisitos:** Python 3.12+, Docker Desktop y Git.
 
@@ -100,9 +100,9 @@ python data_science/eda_historico.py
 
 La API queda disponible en **http://localhost:8000/docs** (documentación interactiva).
 
-📘 Para el día a día del equipo (Git, Docker, venv, pruebas), ver la [guía de flujo de trabajo](docs/flujo-de-trabajo.md).
+Para el día a día del equipo (Git, Docker, venv, pruebas), ver la [guía de flujo de trabajo](docs/flujo-de-trabajo.md).
 
-## 🛣️ Hoja de ruta
+## Hoja de ruta
 
 - [x] Estructura del repositorio y políticas de seguridad
 - [x] ETL del histórico ERA5 (26 304 registros horarios, 2023–2025)
@@ -116,11 +116,11 @@ La API queda disponible en **http://localhost:8000/docs** (documentación intera
 - [ ] Dashboard web en React
 - [ ] Despliegue en la nube e integración continua
 
-## 📚 Fuentes de datos
+## Fuentes de datos
 
 - **ERA5 / ERA5-Land** — reanálisis climático del programa Copernicus (ECMWF), obtenido vía [Open-Meteo](https://open-meteo.com/) (uso no comercial).
 
-## 👥 Equipo
+## Equipo
 
 | Nombre | Rol |
 |---|---|
@@ -128,6 +128,6 @@ La API queda disponible en **http://localhost:8000/docs** (documentación intera
 | Alexa | Ciencia de datos · Big Data · IoT |
 | Kevin | Ciencia de datos · Big Data · IoT |
 
-## 📄 Licencia
+## Licencia
 
 Distribuido bajo la licencia MIT. Ver [LICENSE](LICENSE).
