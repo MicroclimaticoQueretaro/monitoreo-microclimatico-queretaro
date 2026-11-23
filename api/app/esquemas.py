@@ -97,9 +97,17 @@ class BrechaHoraria(BaseModel):
         "indicador de isla de calor urbana."
     )
 
+    temperatura_normal: float | None = Field(
+        description="Promedio histórico (ERA5-Land 2023-2025) para ese mes y hora."
+    )
+    anomalia_climatologica: float | None = Field(
+        description="Sensor menos normal histórico (°C). Positivo = más caliente de lo habitual."
+    )
+
     humedad_sensor: float | None
     humedad_modelo: float | None
     diferencia_humedad: float | None
+    humedad_normal: float | None
 
     presion_estacion_sensor: float | None = Field(description="Presión medida en la estación (hPa).")
     presion_nivel_mar_sensor: float | None = Field(

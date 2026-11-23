@@ -63,6 +63,7 @@ Además, la presión de la estación se reduce al nivel del mar para poder compa
 │   ├── eda_historico.py         # Análisis exploratorio y umbrales
 │   └── alineacion_temporal.py   # Cruce sensor vs. histórico
 ├── api/                     # API REST (FastAPI) — ver api/README.md
+├── web/                     # Dashboard React + Vite — ver web/README.md
 ├── db/init/                 # Esquema SQL: estaciones, lecturas, histórico y climatología
 ├── iot/firmware/            # Firmware del ESP32 (PlatformIO) — ver iot/firmware/README.md
 ├── docs/                    # Diagramas y fotos del hardware
@@ -98,7 +99,10 @@ python data_science/cargar_bd.py       # carga el histórico y genera la climato
 python data_science/eda_historico.py
 ```
 
-La API queda disponible en **http://localhost:8000/docs** (documentación interactiva).
+- **Dashboard:** http://localhost:5173
+- **API (documentación interactiva):** http://localhost:8000/docs
+
+☁️ Para publicarlo en internet (Neon + Render), ver la [guía de despliegue](docs/despliegue.md).
 
 Para el día a día del equipo (Git, Docker, venv, pruebas), ver la [guía de flujo de trabajo](docs/flujo-de-trabajo.md).
 
@@ -113,8 +117,9 @@ Para el día a día del equipo (Git, Docker, venv, pruebas), ver la [guía de fl
 - [x] Firmware del ESP32 enviando datos a la API, con pantalla LCD
 - [x] Anomalía térmica respecto a la climatología
 - [x] Brecha térmica respecto al modelo en tiempo real (Open-Meteo), presión a nivel del mar y radiación estimada
-- [ ] Dashboard web en React
-- [ ] Despliegue en la nube e integración continua
+- [x] Dashboard web en React (Vite + Recharts)
+- [x] Despliegue en la nube (Neon + Render) con HTTPS de punta a punta
+- [ ] Integración continua (GitHub Actions)
 
 ## Fuentes de datos
 

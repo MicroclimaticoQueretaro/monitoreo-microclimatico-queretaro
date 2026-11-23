@@ -1,10 +1,12 @@
-// Implementación de WiFi, hora (NTP) y envío HTTP a la API.
+// Implementación de WiFi, hora (NTP) y envío HTTP/HTTPS a la API.
 #include "red.h"
 
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 
+#include "certificados.h"
 #include "config.h"
 #include "secretos.h"
 
@@ -129,7 +131,18 @@ ResultadoEnvio enviarLectura(const Lectura& lectura) {
 
     HTTPClient http;
     const String url = String(API_URL_BASE) + RUTA_LECTURAS;
-    if (!http.begin(url)) {
+
+    // HTTPS (nube): se verifica el certificado del servidor con los certificados raíz.
+    // HTTP (red local): conexión normal, solo para pruebas en casa.
+    WiFiClientSecure clienteSeguro;
+    WiFiClient clienteNormal;
+    const bool usaHttps = url.startsWith("https://");
+    if (usaHttps) {
+        clienteSeguro.setCACert(CERTIFICADOS_RAIZ);
+    }
+    WiFiClient& cliente = usaHttps ? static_cast<WiFiClient&>(clienteSeguro) : clienteNormal;
+
+    if (!http.begin(cliente, url)) {
         return ResultadoEnvio::ErrorRed;
     }
     http.setTimeout(TIEMPO_ESPERA_HTTP_MS);
