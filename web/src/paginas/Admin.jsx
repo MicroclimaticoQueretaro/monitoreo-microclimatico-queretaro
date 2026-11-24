@@ -143,13 +143,20 @@ function ControlEstacion({ sesion, alSalir }) {
                 <span>{info.descripcion}</span>
               </div>
             </div>
+            {/* Solo se muestra la orden que tiene sentido: midiendo -> Detener; en espera -> Activar.
+                Si la estación está desconectada, se muestran ambas: la orden queda guardada en el
+                broker y se aplica cuando la estación vuelva a conectarse. */}
             <div className="control__botones">
-              <button className="boton boton--primario" disabled={enviando || estado?.estado === 'midiendo'} onClick={() => ordenar('activar')}>
-                Activar medición
-              </button>
-              <button className="boton boton--peligro" disabled={enviando || estado?.estado === 'en_espera'} onClick={() => ordenar('detener')}>
-                Detener
-              </button>
+              {estado?.estado !== 'midiendo' && (
+                <button className="boton boton--primario" disabled={enviando || !estado} onClick={() => ordenar('activar')}>
+                  Activar medición
+                </button>
+              )}
+              {estado?.estado !== 'en_espera' && (
+                <button className="boton boton--peligro" disabled={enviando || !estado} onClick={() => ordenar('detener')}>
+                  Detener
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -210,7 +217,6 @@ export default function Admin() {
       <section className="encabezado-pagina">
         <div>
           <h1>Administración</h1>
-          <p>Activa o detiene la estación a distancia. La orden viaja por MQTT hasta el ESP32.</p>
         </div>
       </section>
       {aviso && <p className="alerta" role="alert">{aviso}</p>}
