@@ -11,7 +11,7 @@ export const EQUIPO = [
     nombre: 'Kevin Ailton Garzón Castro',
     carrera: 'Ingeniería de Sistemas',
     institucion: 'Universidad Tecnológica Nacional de México, campus Querétaro',
-    foto: null,
+    foto: '/equipo/kevin.jpg',
   },
   {
     nombre: 'Maria Luisa Alves Silva',
