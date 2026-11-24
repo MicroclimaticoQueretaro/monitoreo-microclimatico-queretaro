@@ -22,7 +22,7 @@ export default function Cabecera({ rutaActual }) {
         </a>
         <nav aria-label="Secciones">
           <ul className="menu">
-            {SECCIONES.map((seccion) => (
+            {SECCIONES.filter((seccion) => !seccion.oculta).map((seccion) => (
               <li key={seccion.ruta}>
                 <a
                   href={`#/${seccion.ruta}`}

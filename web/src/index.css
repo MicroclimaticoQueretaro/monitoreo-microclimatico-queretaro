@@ -44,7 +44,7 @@ main:focus { outline: none; }
 .marca__logo { width: 36px; height: 36px; flex: none; }
 .marca strong { display: block; font-size: 16px; }
 .marca small { display: block; font-size: 12px; color: var(--texto-secundario); }
-.menu { list-style: none; margin: 0; padding: 4px; display: flex; gap: 4px; background: var(--fondo-suave); border: 1px solid var(--borde); border-radius: 999px; }
+.menu { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px; }
 .menu__enlace { display: block; padding: 6px 14px; border-radius: 999px; text-decoration: none; color: var(--texto-secundario); font-size: 14px; font-weight: 500; }
 .menu__enlace:hover { color: var(--verde-oscuro); }
 .menu__enlace--activo { background: var(--verde); color: #fff; }
@@ -186,3 +186,6 @@ main:focus { outline: none; }
   color: #9a3412;
   border-radius: 6px;
 }
+
+/* Segunda línea del título de la portada */
+.portada__lugar { display: block; font-size: 0.6em; font-weight: 600; color: var(--naranja-claro); margin-top: 4px; }

@@ -1,5 +1,5 @@
 // Inicio: consulta en tiempo real (lecturas y brecha térmica minuto a minuto).
-import { obtenerBrecha, obtenerBrechaMinutos, obtenerEstacion, obtenerEstadoEstacion, obtenerLecturas } from '../api'
+import { obtenerBrecha, obtenerBrechaMinutos, obtenerEstadoEstacion, obtenerLecturas } from '../api'
 import { COLORES } from '../colores'
 import { Alerta, Cargando, EstadoEstacion } from '../componentes/Estado'
 import GraficoLineas from '../componentes/GraficoLineas'
@@ -15,8 +15,7 @@ import useConsulta from '../useConsulta'
 async function consultarTiempoReal() {
   // La API devuelve las últimas horas QUE TIENEN DATOS (terminan en la última lectura),
   // así que el Inicio nunca queda vacío aunque la estación esté detenida
-  const [estacion, lecturas, minutos, horas, estadoRemoto] = await Promise.all([
-    obtenerEstacion(),
+  const [lecturas, minutos, horas, estadoRemoto] = await Promise.all([
     obtenerLecturas(HORAS_TIEMPO_REAL, HORAS_TIEMPO_REAL * 60),
     obtenerBrechaMinutos(HORAS_TIEMPO_REAL),
     obtenerBrecha(3),
@@ -28,7 +27,6 @@ async function consultarTiempoReal() {
   const minutoConBrecha = [...minutos].reverse().find((fila) => fila.brecha_termica !== null) ?? null
   const horaConBrecha = [...horas].reverse().find((fila) => fila.presion_nivel_mar_sensor !== null) ?? null
   return {
-    estacion,
     minutos,
     lecturas,
     ultima: ultima ? { ...ultima, temperatura: ultima.temperatura_bmp ?? ultima.temperatura_dht } : null,
@@ -47,7 +45,7 @@ export default function Inicio() {
   )
   if (cargando) return <Cargando esperaLarga={esperaLarga} />
 
-  const { estacion, minutos, lecturas, ultima, minutoConBrecha, horaConBrecha, historico, estadoRemoto } = datos ?? {
+  const { minutos, lecturas, ultima, minutoConBrecha, horaConBrecha, historico, estadoRemoto } = datos ?? {
     minutos: [],
     lecturas: [],
     ultima: null,
@@ -62,10 +60,13 @@ export default function Inicio() {
     <>
       <section className="portada" style={{ backgroundImage: `url(${FOTO_PORTADA})` }}>
         <div className="portada__contenido">
-          <h1>{estacion?.nombre ?? 'Estación meteorológica'}</h1>
+          {/* "Querétaro" va en su propia línea para que el título no se corte en un lugar raro */}
+          <h1>
+            Monitoreo Microclimático <span className="portada__lugar">Querétaro</span>
+          </h1>
           <p className="portada__texto">
-            Medimos minuto a minuto el clima de la calle para descubrir cuánto más caliente está el centro de
-            Querétaro que la región que lo rodea.
+            Mediciones minuto a minuto en las calles del Centro Histórico de Querétaro para descubrir cuánto más
+            caliente está respecto a la región que lo rodea.
           </p>
           <EstadoEstacion ultimaLectura={ultima} referencia={actualizadoEn} estadoRemoto={estadoRemoto} />
         </div>
