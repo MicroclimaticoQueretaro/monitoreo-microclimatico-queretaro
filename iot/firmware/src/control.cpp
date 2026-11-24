@@ -1,4 +1,4 @@
-// Implementación del control remoto por MQTT (broker HiveMQ Cloud, con TLS).
+// Implementación del control remoto por MQTT (broker EMQX Cloud Serverless, con TLS).
 //
 // Temas:
 //   <prefijo>/<estación>/comando -> la API publica {"accion":"activar"|"detener"} (retenido)
@@ -140,7 +140,7 @@ void iniciarControl() {
     temaEstado = String(MQTT_PREFIJO) + "/" + CODIGO_ESTACION + "/estado";
 
     if (MQTT_TLS) {
-        clienteSeguro.setCACert(CERTIFICADOS_RAIZ);  // HiveMQ Cloud usa certificados de Let's Encrypt
+        clienteSeguro.setCACert(CERTIFICADOS_RAIZ);  // EMQX Cloud usa un certificado firmado por DigiCert
         mqtt.setClient(clienteSeguro);
     } else {
         mqtt.setClient(clienteNormal);

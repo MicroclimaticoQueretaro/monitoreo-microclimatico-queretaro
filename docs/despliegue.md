@@ -7,17 +7,17 @@ Guía paso a paso para publicar el proyecto en internet con servicios **gratuito
 | Base de datos PostgreSQL | **Neon** | 1 GB por proyecto; soporta TimescaleDB |
 | API (FastAPI, Docker) | **Render** — Web Service | Se "duerme" tras 15 min sin tráfico y tarda ~1 min en despertar. El ESP32 envía cada minuto, así que la mantiene activa |
 | Dashboard (React) | **Render** — Static Site | Siempre activo |
-| Broker MQTT (activar / detener) | **HiveMQ Cloud** — Serverless | 100 conexiones, 10 GB/mes, sin tarjeta |
+| Broker MQTT (activar / detener) | **EMQX Cloud** — Serverless | 1 millón de minutos de sesión y 1 GB/mes, sin tarjeta |
 
 ```
 ESP32 --HTTPS (lecturas)--> API (Render) --> PostgreSQL (Neon)
   ^                           |
-  +---- MQTT (órdenes) --- HiveMQ Cloud <--- (la API publica "activar"/"detener")
+  +---- MQTT (órdenes) ---   EMQX Cloud <--- (la API publica "activar"/"detener")
                               ^
 Navegador --> Dashboard (Render) --HTTPS (consulta la API / panel Admin)
 ```
 
-> **Seguridad:** la cadena de conexión de Neon (`DATABASE_URL`), las contraseñas de HiveMQ y la del
+> **Seguridad:** la cadena de conexión de Neon (`DATABASE_URL`), las contraseñas de EMQX y la del
 > administrador son secretas. Solo se guardan en las variables de entorno de Render, en tu terminal
 > y en `secretos.h` (ignorado por Git). **Nunca** en archivos del repositorio ni en el chat.
 
@@ -85,14 +85,19 @@ docker run --rm -i postgres:16 psql "$DATABASE_URL" \
 
 > `lecturas_locales.csv` está cubierto por `*.csv` en `.gitignore`. Bórralo después.
 
-## 3.5 Crear el broker MQTT en HiveMQ Cloud
+## 3.5 Crear el broker MQTT en EMQX Cloud
 
-1. Entrar a **console.hivemq.cloud** → crear cuenta → **Create new cluster** → elegir **Serverless (Free)**
-   (no "Starter": ese es de prueba y luego cobra).
-2. En el clúster → **Overview**: copiar la **Cluster URL** (ej. `abc123.s1.eu.hivemq.cloud`). El puerto TLS es **8883**.
-3. **Access Management → Credentials** → crear **dos** credenciales con permiso **Publish and Subscribe**:
-   - `api-microclima` → la usa la API (Render).
-   - `esp32-qro-centro-01` → la usa el ESP32.
+> HiveMQ Cloud dejó de permitir clústeres gratuitos nuevos (fin del plan *Serverless*), por eso se usa
+> **EMQX Cloud Serverless**: gratis hasta 1 millón de minutos de sesión y 1 GB al mes, sin tarjeta.
+
+1. Entrar a **cloud-intl.emqx.com** → crear cuenta → **New Deployment** → elegir **Serverless**.
+   Región: **AWS US East 1 (N. Virginia)** si está disponible. **Spend limit: dejar en 0** (así nunca cobra).
+2. En el *deployment* → **Overview**: copiar la **Address** (ej. `abc123.ala.us-east-1.emqxsl.com`).
+   El puerto TLS es **8883**. El certificado de EMQX está firmado por **DigiCert Global Root G2**,
+   que ya está en `iot/firmware/include/certificados.h`.
+3. **Access Control → Authentication** → **Add** → crear **dos** usuarios:
+   - `api-microclima` → lo usa la API (Render).
+   - `esp32-qro-centro-01` → lo usa el ESP32.
 
    > Dos credenciales distintas: si una se filtra, se borra solo esa sin afectar a la otra.
 
@@ -109,7 +114,7 @@ docker run --rm -i postgres:16 psql "$DATABASE_URL" \
    | `DATABASE_URL` | la cadena de Neon |
    | `ORIGENES_CORS` | `["https://microclima-dashboard.onrender.com"]` |
    | `VITE_API_URL` | `https://microclima-api.onrender.com` |
-   | `MQTT_HOST` | la Cluster URL de HiveMQ (sin `https://` ni puerto) |
+   | `MQTT_HOST` | la Address de EMQX (sin `mqtts://` ni puerto) |
    | `MQTT_USUARIO` / `MQTT_CONTRASENA` | la credencial `api-microclima` |
 
 4. **Apply**. La primera construcción tarda algunos minutos.
@@ -137,7 +142,7 @@ En `iot/firmware/include/secretos.h`:
 constexpr char API_URL_BASE[] = "https://<api>.onrender.com";   // sin barra al final
 constexpr char API_TOKEN[] = "token creado en el paso 3";
 
-#define MQTT_HOST "la Cluster URL de HiveMQ"
+#define MQTT_HOST "la Address de EMQX"
 #define MQTT_PUERTO 8883
 #define MQTT_USUARIO "esp32-qro-centro-01"
 #define MQTT_CONTRASENA "contraseña de esa credencial"

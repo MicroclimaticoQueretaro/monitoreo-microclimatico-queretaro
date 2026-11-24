@@ -18,9 +18,9 @@ services:
         value: "true"
       - key: ORIGENES_CORS         # ej.: ["https://microclima-dashboard.onrender.com"]
         sync: false
-      - key: MQTT_HOST             # dirección del clúster de HiveMQ Cloud (ej. xxxx.s1.eu.hivemq.cloud)
+      - key: MQTT_HOST             # dirección del clúster de EMQX Cloud (ej. xxxx.ala.us-east-1.emqxsl.com)
         sync: false
-      - key: MQTT_USUARIO          # credencial de la API en HiveMQ (secreta)
+      - key: MQTT_USUARIO          # credencial de la API en EMQX (secreta)
         sync: false
       - key: MQTT_CONTRASENA
         sync: false

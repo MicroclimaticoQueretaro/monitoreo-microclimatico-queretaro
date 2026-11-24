@@ -40,7 +40,7 @@ class Configuracion(BaseSettings):
     # plan gratuito permite un solo servicio). En local lo hace el servicio "sincronizador".
     sincronizar_en_api: bool = False
 
-    # Broker MQTT (HiveMQ Cloud) para activar/detener la estación desde el sitio.
+    # Broker MQTT (EMQX Cloud) para activar/detener la estación desde el sitio.
     # Si MQTT_HOST está vacío, el control remoto queda desactivado.
     mqtt_host: str | None = None
     mqtt_puerto: int = 8883

@@ -1,4 +1,4 @@
-"""Comunicación con la estación por MQTT (broker HiveMQ Cloud).
+"""Comunicación con la estación por MQTT (broker EMQX Cloud Serverless).
 
 Temas (topics) por estación:
   <prefijo>/<codigo>/comando  -> la API publica "activar" o "detener" (mensaje RETENIDO)
