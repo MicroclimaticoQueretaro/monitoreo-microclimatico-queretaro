@@ -176,3 +176,13 @@ main:focus { outline: none; }
 .boton:disabled { opacity: 0.45; cursor: not-allowed; }
 .control { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
 .control__botones { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Aviso cuando los gráficos muestran un periodo anterior (estación detenida) */
+.nota--aviso {
+  margin: 0 0 16px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--naranja, #ea580c);
+  background: #fff7ed;
+  color: #9a3412;
+  border-radius: 6px;
+}

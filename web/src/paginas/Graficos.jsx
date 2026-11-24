@@ -8,7 +8,7 @@ import GraficoLineas from '../componentes/GraficoLineas'
 import Panel from '../componentes/Panel'
 import TablaHoras from '../componentes/TablaHoras'
 import { ACTUALIZACION_GRAFICOS_MS } from '../configuracion'
-import { diaLocal, horaLocal } from '../formato'
+import { diaHoraLocal, diaLocal, esAntigua, horaLocal } from '../formato'
 import useConsulta from '../useConsulta'
 
 const PERIODOS = [
@@ -42,6 +42,10 @@ export default function Graficos() {
     [horas],
   )
   const filas = datos ?? []
+  // Los periodos terminan en la última lectura: si es antigua, se indica hasta cuándo hay datos
+  const ultimaHora = filas.at(-1)?.hora ?? null
+  const avisoPeriodo =
+    ultimaHora && esAntigua(ultimaHora, 90) ? `Mostrando los datos registrados hasta ${diaHoraLocal(ultimaHora)}.` : null
   // Para 7 días, el eje muestra la fecha; para 24/48 h, la hora
   const formatoEje = horas > 48 ? diaLocal : horaLocal
 
@@ -56,6 +60,7 @@ export default function Graficos() {
       </section>
 
       <Alerta error={error} />
+      {avisoPeriodo && <p className="nota nota--aviso">{avisoPeriodo}</p>}
       {cargando ? (
         <Cargando esperaLarga={esperaLarga} />
       ) : (

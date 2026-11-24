@@ -1,33 +1,41 @@
-// Inicio: consulta en tiempo real (lecturas minuto a minuto de la estación).
-import { obtenerBrecha, obtenerEstacion, obtenerEstadoEstacion, obtenerLecturas } from '../api'
+// Inicio: consulta en tiempo real (lecturas y brecha térmica minuto a minuto).
+import { obtenerBrecha, obtenerBrechaMinutos, obtenerEstacion, obtenerEstadoEstacion, obtenerLecturas } from '../api'
 import { COLORES } from '../colores'
 import { Alerta, Cargando, EstadoEstacion } from '../componentes/Estado'
 import GraficoLineas from '../componentes/GraficoLineas'
 import { IconoCiudad, IconoGota, IconoPresion, IconoSol, IconoTermometro } from '../componentes/Iconos'
 import Panel from '../componentes/Panel'
 import Tarjeta from '../componentes/Tarjeta'
-import { ACTUALIZACION_TIEMPO_REAL_MS, CREDITO_FOTO, FOTO_PORTADA, HORAS_TIEMPO_REAL } from '../configuracion'
-import { conSigno, diaHoraLocal, numero } from '../formato'
+import {
+  ACTUALIZACION_TIEMPO_REAL_MS, CREDITO_FOTO, FOTO_PORTADA, HORAS_TIEMPO_REAL, MINUTOS_SIN_DATOS,
+} from '../configuracion'
+import { conSigno, diaHoraLocal, esAntigua, horaLocal, numero } from '../formato'
 import useConsulta from '../useConsulta'
 
 async function consultarTiempoReal() {
-  const [estacion, lecturas, horas, estadoRemoto] = await Promise.all([
+  // La API devuelve las últimas horas QUE TIENEN DATOS (terminan en la última lectura),
+  // así que el Inicio nunca queda vacío aunque la estación esté detenida
+  const [estacion, lecturas, minutos, horas, estadoRemoto] = await Promise.all([
     obtenerEstacion(),
     obtenerLecturas(HORAS_TIEMPO_REAL, HORAS_TIEMPO_REAL * 60),
-    obtenerBrecha(24),
+    obtenerBrechaMinutos(HORAS_TIEMPO_REAL),
+    obtenerBrecha(3),
     // El estado por MQTT es opcional: si falla, se usa solo la hora de la última lectura
     obtenerEstadoEstacion().catch(() => null),
   ])
-  // Si la estación no envió nada en las últimas horas, se busca su última lectura (hasta 30 días atrás)
-  const ultimaDisponible = lecturas.length > 0 ? lecturas.at(-1) : (await obtenerLecturas(24 * 30, 1)).at(-1) ?? null
-  // Para los gráficos se usa la temperatura del BME280 y, si falta, la del DHT11
-  const conTemperatura = (l) => ({ ...l, temperatura: l.temperatura_bmp ?? l.temperatura_dht })
-  const horaConBrecha = [...horas].reverse().find((fila) => fila.brecha_termica !== null) ?? null
+  // Para las tarjetas se usa la temperatura del BME280 y, si falta, la del DHT11
+  const ultima = lecturas.at(-1) ?? null
+  const minutoConBrecha = [...minutos].reverse().find((fila) => fila.brecha_termica !== null) ?? null
+  const horaConBrecha = [...horas].reverse().find((fila) => fila.presion_nivel_mar_sensor !== null) ?? null
   return {
     estacion,
-    lecturas: lecturas.map(conTemperatura),
-    ultima: ultimaDisponible ? conTemperatura(ultimaDisponible) : null,
+    minutos,
+    lecturas,
+    ultima: ultima ? { ...ultima, temperatura: ultima.temperatura_bmp ?? ultima.temperatura_dht } : null,
+    minutoConBrecha,
     horaConBrecha,
+    // Si la última lectura es antigua, la estación está detenida y se muestra su último periodo con datos
+    historico: ultima !== null && esAntigua(ultima.ts, MINUTOS_SIN_DATOS),
     estadoRemoto: estadoRemoto?.estado ?? null,
   }
 }
@@ -39,8 +47,16 @@ export default function Inicio() {
   )
   if (cargando) return <Cargando esperaLarga={esperaLarga} />
 
-  const { estacion, lecturas, ultima, horaConBrecha, estadoRemoto } = datos ?? { lecturas: [], ultima: null }
-  const brecha = horaConBrecha?.brecha_termica ?? null
+  const { estacion, minutos, lecturas, ultima, minutoConBrecha, horaConBrecha, historico, estadoRemoto } = datos ?? {
+    minutos: [],
+    lecturas: [],
+    ultima: null,
+    historico: false,
+  }
+  const brecha = minutoConBrecha?.brecha_termica ?? null
+  const periodo = historico
+    ? `Últimas ${HORAS_TIEMPO_REAL} horas registradas (hasta ${diaHoraLocal(ultima.ts)})`
+    : `Últimas ${HORAS_TIEMPO_REAL} horas`
 
   return (
     <>
@@ -62,15 +78,13 @@ export default function Inicio() {
         <Tarjeta
           destacada
           icono={<IconoCiudad />}
-          titulo="Brecha térmica (última hora)"
+          titulo={historico ? 'Brecha térmica (último registro)' : 'Brecha térmica (ahora)'}
           valor={conSigno(brecha)}
           unidad=" °C"
           detalle={
             brecha === null
               ? 'Esperando la comparación con el modelo'
-              : brecha >= 0
-                ? 'La calle está más caliente que la región'
-                : 'La calle está más fresca que la región'
+              : `${brecha >= 0 ? 'Calle más caliente' : 'Calle más fresca'} que la región · ${horaLocal(minutoConBrecha.ts)}`
           }
         />
         <Tarjeta
@@ -96,37 +110,43 @@ export default function Inicio() {
       </section>
 
       {lecturas.length === 0 ? (
-        <Panel titulo="Sin lecturas recientes">
-          <p className="vacio">
-            La estación no envió datos en las últimas {HORAS_TIEMPO_REAL} horas
-            {ultima ? `. Arriba se muestra su última lectura (${diaHoraLocal(ultima.ts)}).` : '.'} Los registros
-            anteriores están disponibles en la sección <a href="#/graficos">Gráficos</a>.
-          </p>
+        <Panel titulo="Aún no hay lecturas">
+          <p className="vacio">La estación todavía no ha enviado datos. Aparecerán aquí en cuanto empiece a medir.</p>
         </Panel>
       ) : (
       <div className="rejilla-2">
-        <Panel titulo="Temperatura minuto a minuto" descripcion={`Últimas ${HORAS_TIEMPO_REAL} horas`}>
+        <Panel titulo="Temperatura minuto a minuto: calle vs. región" descripcion={periodo}>
           <GraficoLineas
-            datos={lecturas}
+            datos={minutos}
             claveX="ts"
             unidad="°C"
-            altura={240}
-            series={[{ clave: 'temperatura', nombre: 'Temperatura', color: COLORES.sensor }]}
+            altura={260}
+            series={[
+              { clave: 'temperatura_sensor', nombre: 'Sensor (calle)', color: COLORES.sensor },
+              { clave: 'temperatura_modelo', nombre: 'Modelo regional', color: COLORES.modelo },
+              { clave: 'temperatura_normal', nombre: 'Normal 2023–2025', color: COLORES.normal, punteada: true },
+            ]}
           />
         </Panel>
-        <Panel titulo="Humedad minuto a minuto" descripcion={`Últimas ${HORAS_TIEMPO_REAL} horas`}>
+        <Panel titulo="Humedad minuto a minuto: calle vs. región" descripcion={periodo}>
           <GraficoLineas
-            datos={lecturas}
+            datos={minutos}
             claveX="ts"
             unidad="%"
-            altura={240}
+            altura={260}
             decimales={0}
-            series={[{ clave: 'humedad', nombre: 'Humedad', color: COLORES.humedad }]}
+            series={[
+              { clave: 'humedad_sensor', nombre: 'Sensor (calle)', color: COLORES.sensor },
+              { clave: 'humedad_modelo', nombre: 'Modelo regional', color: COLORES.modelo },
+            ]}
           />
         </Panel>
       </div>
       )}
-      <p className="nota">Se actualiza automáticamente cada 30 segundos. Cada punto es el promedio de 12 mediciones.</p>
+      <p className="nota">
+        Se actualiza automáticamente cada 30 segundos. Cada punto del sensor es el promedio de 12 mediciones. El modelo
+        regional y el normal histórico son datos por hora: entre una hora y la siguiente se interpolan linealmente.
+      </p>
     </>
   )
 }

@@ -24,6 +24,10 @@ export const conSigno = (valor, decimales = 1) => {
   return valor > 0 ? `+${texto}` : valor < 0 ? `−${texto}` : texto
 }
 
+// true si la fecha es más antigua que "minutos" respecto de la referencia
+export const esAntigua = (fecha, minutos, referencia = new Date()) =>
+  referencia.getTime() - new Date(fecha).getTime() > minutos * 60_000
+
 // "hace 3 min", "hace 2 h"
 export const haceCuanto = (fecha, referencia = new Date()) => {
   const minutos = Math.round((referencia.getTime() - new Date(fecha).getTime()) / 60_000)

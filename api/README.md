@@ -14,12 +14,17 @@ Documentación interactiva (con la API corriendo): **http://localhost:8000/docs*
 | `GET` | `/api/v1/estaciones/{codigo}/lecturas?horas=24` | — | Lecturas recientes |
 | `GET` | `/api/v1/estaciones/{codigo}/comparacion?horas=24` | — | Lecturas vs. climatología (anomalía) |
 | `GET` | `/api/v1/estaciones/{codigo}/brecha?horas=24` | — | Brecha térmica hora por hora: sensor vs. modelo meteorológico |
+| `GET` | `/api/v1/estaciones/{codigo}/brecha/minutos?horas=3` | — | Brecha minuto a minuto (modelo y normal interpolados linealmente entre horas) |
 | `GET` | `/api/v1/estaciones/{codigo}/estado` | — | Estado remoto: `midiendo`, `en_espera`, `desconectado` o `desconocido` |
 | `POST` | `/api/v1/admin/login` | — | Inicia sesión de administrador (devuelve un token de sesión de 8 h) |
 | `GET` | `/api/v1/admin/sesion` | Admin | Verifica la sesión actual |
 | `POST` | `/api/v1/admin/logout` | Admin | Cierra la sesión |
 | `POST` | `/api/v1/estaciones/{codigo}/comando` | Admin | Envía `{"accion":"activar"}` o `{"accion":"detener"}` por MQTT |
 | `GET` | `/api/v1/estaciones/{codigo}/comandos` | Admin | Historial de órdenes (auditoría) |
+
+> **Ventana anclada:** las consultas devuelven las N horas que **terminan en la última lectura**
+> de la estación (no en "ahora"). Si la estación está detenida, el sitio muestra sus datos más
+> recientes en lugar de quedar vacío.
 
 ## Contrato de la lectura (lo que envía el ESP32)
 
