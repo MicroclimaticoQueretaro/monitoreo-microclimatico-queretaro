@@ -75,6 +75,7 @@ main:focus { outline: none; }
 .estado__punto { width: 10px; height: 10px; border-radius: 50%; flex: none; }
 .estado--activa .estado__punto { background: var(--verde); box-shadow: 0 0 0 4px var(--verde-claro); }
 .estado--inactiva .estado__punto { background: var(--alerta); box-shadow: 0 0 0 4px var(--alerta-claro); }
+.estado--espera .estado__punto { background: var(--celeste); box-shadow: 0 0 0 4px var(--celeste-claro); }
 
 /* ---------- Tarjetas ---------- */
 .tarjetas { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
@@ -160,3 +161,18 @@ main:focus { outline: none; }
   .portada::before { background: linear-gradient(0deg, rgb(15 23 42 / 0.88) 0%, rgb(15 23 42 / 0.45) 65%, rgb(15 23 42 / 0.15) 100%); }
   .portada h1 { font-size: 28px; }
 }
+
+/* ---------- Administración ---------- */
+.formulario { display: grid; gap: 14px; max-width: 360px; }
+.formulario label { display: grid; gap: 6px; font-size: 14px; font-weight: 500; }
+.formulario input { padding: 10px 12px; border: 1px solid var(--linea-eje); border-radius: 10px; font: inherit; }
+.formulario input:focus { outline: 2px solid var(--celeste); outline-offset: 1px; border-color: transparent; }
+.formulario__error { color: #b91c1c; font-size: 14px; }
+.formulario__exito { color: var(--verde-oscuro); font-size: 14px; }
+.boton--primario { background: var(--verde); border-color: var(--verde); color: #fff; justify-self: start; }
+.boton--primario:hover { background: var(--verde-oscuro); }
+.boton--peligro { border-color: var(--naranja); color: var(--naranja-oscuro); }
+.boton--peligro:hover { background: var(--naranja-claro); }
+.boton:disabled { opacity: 0.45; cursor: not-allowed; }
+.control { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+.control__botones { display: flex; gap: 10px; flex-wrap: wrap; }

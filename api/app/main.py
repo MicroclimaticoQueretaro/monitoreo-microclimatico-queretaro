@@ -15,7 +15,7 @@ from sqlalchemy.engine import Connection
 
 from app.config import obtener_configuracion
 from app.db import obtener_conexion
-from app.rutas import brecha, comparacion, estaciones, lecturas
+from app.rutas import admin, brecha, comparacion, control, estaciones, lecturas
 from app.tareas import iniciar_sincronizacion
 
 PREFIJO_API = "/api/v1"  # versionar la API permite cambiarla en el futuro sin romper el ESP32
@@ -40,7 +40,7 @@ app = FastAPI(
         "histórica del reanálisis ERA5-Land (2023-2025) y con el modelo meteorológico en "
         "tiempo real (Open-Meteo) para calcular la brecha térmica (isla de calor urbana)."
     ),
-    version="0.3.0",
+    version="0.4.0",
 )
 
 # CORS: solo los orígenes configurados (el dashboard) pueden consultar la API desde un navegador
@@ -55,6 +55,8 @@ app.include_router(estaciones.router, prefix=PREFIJO_API)
 app.include_router(lecturas.router, prefix=PREFIJO_API)
 app.include_router(comparacion.router, prefix=PREFIJO_API)
 app.include_router(brecha.router, prefix=PREFIJO_API)
+app.include_router(control.router, prefix=PREFIJO_API)
+app.include_router(admin.router, prefix=PREFIJO_API)
 
 
 @app.get("/salud", tags=["Sistema"], summary="Verificar que la API y la base de datos respondan")

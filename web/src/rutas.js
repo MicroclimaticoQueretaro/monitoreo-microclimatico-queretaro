@@ -6,6 +6,7 @@ export const SECCIONES = [
   { ruta: 'inicio', nombre: 'Inicio' },
   { ruta: 'graficos', nombre: 'Gráficos' },
   { ruta: 'sobre', nombre: 'Sobre el proyecto' },
+  { ruta: 'admin', nombre: 'Admin' },
 ]
 
 function leerRuta() {

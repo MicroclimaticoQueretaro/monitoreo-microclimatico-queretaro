@@ -24,6 +24,12 @@ constexpr uint8_t LCD_FILAS = 2;
 constexpr uint8_t LCD_DIRECCIONES[] = {0x27, 0x3F};
 constexpr uint32_t INTERVALO_PAGINA_LCD_MS = 3000;  // cambia de página cada 3 s
 
+// ---------- Control remoto por MQTT ----------
+// El servidor, usuario y contraseña van en secretos.h
+constexpr char MQTT_PREFIJO[] = "microclima";
+constexpr uint32_t MQTT_INTERVALO_REINTENTO_MS = 15000;
+constexpr uint16_t MQTT_KEEPALIVE_S = 30;
+
 // ---------- Estación ----------
 constexpr char CODIGO_ESTACION[] = "QRO-CENTRO-01";
 constexpr char RUTA_LECTURAS[] = "/api/v1/lecturas";

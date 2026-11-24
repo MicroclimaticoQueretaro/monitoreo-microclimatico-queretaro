@@ -40,6 +40,20 @@ class Configuracion(BaseSettings):
     # plan gratuito permite un solo servicio). En local lo hace el servicio "sincronizador".
     sincronizar_en_api: bool = False
 
+    # Broker MQTT (EMQX Cloud) para activar/detener la estación desde el sitio.
+    # Si MQTT_HOST está vacío, el control remoto queda desactivado.
+    mqtt_host: str | None = None
+    mqtt_puerto: int = 8883
+    mqtt_usuario: str | None = None
+    mqtt_contrasena: str | None = None
+    mqtt_tls: bool = True
+    mqtt_prefijo: str = "microclima"
+
+    # Administración
+    duracion_sesion_horas: int = 8
+    intentos_login_maximos: int = 5        # por dirección IP...
+    ventana_intentos_minutos: int = 15     # ...en esta ventana de tiempo
+
     @model_validator(mode="after")
     def validar_conexion(self) -> "Configuracion":
         if self.database_url is None and not (

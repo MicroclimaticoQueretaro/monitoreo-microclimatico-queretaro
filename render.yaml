@@ -7,6 +7,7 @@ services:
     name: microclima-api
     runtime: docker
     plan: free
+    region: virginia             # misma región que la base de datos en Neon (AWS US East 1)
     dockerfilePath: ./api/Dockerfile
     dockerContext: ./api
     healthCheckPath: /salud
@@ -16,6 +17,12 @@ services:
       - key: SINCRONIZAR_EN_API    # el plan gratuito permite un solo servicio: la API sincroniza
         value: "true"
       - key: ORIGENES_CORS         # ej.: ["https://microclima-dashboard.onrender.com"]
+        sync: false
+      - key: MQTT_HOST             # dirección del clúster de EMQX Cloud (ej. xxxx.ala.us-east-1.emqxsl.com)
+        sync: false
+      - key: MQTT_USUARIO          # credencial de la API en EMQX (secreta)
+        sync: false
+      - key: MQTT_CONTRASENA
         sync: false
 
   # Dashboard (React) como sitio estático: gratuito y sin "dormirse".

@@ -1,5 +1,5 @@
 // Inicio: consulta en tiempo real (lecturas minuto a minuto de la estación).
-import { obtenerBrecha, obtenerEstacion, obtenerLecturas } from '../api'
+import { obtenerBrecha, obtenerEstacion, obtenerEstadoEstacion, obtenerLecturas } from '../api'
 import { COLORES } from '../colores'
 import { Alerta, Cargando, EstadoEstacion } from '../componentes/Estado'
 import GraficoLineas from '../componentes/GraficoLineas'
@@ -11,10 +11,12 @@ import { conSigno, diaHoraLocal, numero } from '../formato'
 import useConsulta from '../useConsulta'
 
 async function consultarTiempoReal() {
-  const [estacion, lecturas, horas] = await Promise.all([
+  const [estacion, lecturas, horas, estadoRemoto] = await Promise.all([
     obtenerEstacion(),
     obtenerLecturas(HORAS_TIEMPO_REAL, HORAS_TIEMPO_REAL * 60),
     obtenerBrecha(24),
+    // El estado por MQTT es opcional: si falla, se usa solo la hora de la última lectura
+    obtenerEstadoEstacion().catch(() => null),
   ])
   // Si la estación no envió nada en las últimas horas, se busca su última lectura (hasta 30 días atrás)
   const ultimaDisponible = lecturas.length > 0 ? lecturas.at(-1) : (await obtenerLecturas(24 * 30, 1)).at(-1) ?? null
@@ -26,6 +28,7 @@ async function consultarTiempoReal() {
     lecturas: lecturas.map(conTemperatura),
     ultima: ultimaDisponible ? conTemperatura(ultimaDisponible) : null,
     horaConBrecha,
+    estadoRemoto: estadoRemoto?.estado ?? null,
   }
 }
 
@@ -36,19 +39,19 @@ export default function Inicio() {
   )
   if (cargando) return <Cargando esperaLarga={esperaLarga} />
 
-  const { estacion, lecturas, ultima, horaConBrecha } = datos ?? { lecturas: [], ultima: null }
+  const { estacion, lecturas, ultima, horaConBrecha, estadoRemoto } = datos ?? { lecturas: [], ultima: null }
   const brecha = horaConBrecha?.brecha_termica ?? null
 
   return (
     <>
       <section className="portada" style={{ backgroundImage: `url(${FOTO_PORTADA})` }}>
         <div className="portada__contenido">
-          <h1>{estacion?.nombre ?? 'Monitoreo Microclimático Querétaro'}</h1>
+          <h1>{estacion?.nombre ?? 'Estación meteorológica'}</h1>
           <p className="portada__texto">
-            Medimos minuto a minuto el clima de la calle para descubrir cuánto más caliente está el centro histórico de
+            Medimos minuto a minuto el clima de la calle para descubrir cuánto más caliente está el centro de
             Querétaro que la región que lo rodea.
           </p>
-          <EstadoEstacion ultimaLectura={ultima} referencia={actualizadoEn} />
+          <EstadoEstacion ultimaLectura={ultima} referencia={actualizadoEn} estadoRemoto={estadoRemoto} />
         </div>
         <p className="portada__credito">{CREDITO_FOTO}</p>
       </section>

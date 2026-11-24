@@ -21,6 +21,9 @@ struct EstadoSistema {
     size_t lecturasPendientes = 0;
     uint32_t enviosExitosos = 0;
     time_t ahora = 0;
+    bool midiendo = true;        // false = en espera (detenida desde el sitio)
+    bool controlRemoto = false;  // true si MQTT está configurado
+    bool mqttConectado = false;
 };
 
 // Medición promediada lista para enviar, con su marca de tiempo.

@@ -32,13 +32,29 @@ iot/firmware/
 │   ├── tipos.h               # Estructuras Medicion y Lectura
 │   ├── sensores.h            # Interfaz de los sensores
 │   ├── pantalla.h            # Interfaz de la pantalla LCD
+│   ├── control.h             # Interfaz del control remoto (MQTT)
 │   └── red.h                 # Interfaz de WiFi, NTP y API
 └── src/
     ├── main.cpp              # Ciclo principal no bloqueante y cola de envío
     ├── sensores.cpp          # Lectura, validación de rangos y promedio
     ├── pantalla.cpp          # Páginas rotativas del LCD (sin bloquear)
+    ├── control.cpp           # Órdenes activar / detener por MQTT (TLS) y modo guardado en NVS
     └── red.cpp               # WiFi, hora NTP y envío HTTP con token
 ```
+
+### Activar / detener desde el sitio (MQTT)
+
+```
+Encender -> WiFi -> hora NTP -> MQTT -> "En espera"
+                                  | Admin: Activar  -> mide cada 5 s y envía cada minuto
+                                  | Admin: Detener  -> vuelve a "En espera"
+```
+
+- Configurar `MQTT_HOST`, `MQTT_USUARIO` y `MQTT_CONTRASENA` en `secretos.h` (credencial del ESP32).
+  Si `MQTT_HOST` queda vacío, la estación **mide siempre** (como antes).
+- El modo se guarda en la memoria no volátil (NVS): tras un corte de energía vuelve en el mismo modo.
+- Al activarse empieza un minuto nuevo; las lecturas que quedaron en la cola se envían aunque esté en espera.
+- En la pantalla, la página de estado muestra `W:OK M:OK` (WiFi y MQTT; `NA` = MQTT no configurado).
 
 ## Pantalla LCD
 

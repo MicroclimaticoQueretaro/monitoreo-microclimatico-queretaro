@@ -34,6 +34,11 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
+      # Broker MQTT para activar / detener la estación desde el sitio (vacío = desactivado)
+      MQTT_HOST: ${MQTT_HOST:-}
+      MQTT_PUERTO: ${MQTT_PUERTO:-8883}
+      MQTT_USUARIO: ${MQTT_USUARIO:-}
+      MQTT_CONTRASENA: ${MQTT_CONTRASENA:-}
     # Por defecto solo es accesible desde esta computadora (127.0.0.1).
     # Para que el ESP32 la alcance por WiFi, poner API_HOST_BIND=0.0.0.0 en el .env
     # (solo en redes de confianza: la API queda visible para toda la red local).
