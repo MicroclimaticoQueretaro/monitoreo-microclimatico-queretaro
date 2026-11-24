@@ -1,7 +1,7 @@
 """Configuración compartida de las pruebas.
 
 Las pruebas usan la base de datos configurada en .env (debe estar levantada) y
-crean estaciones temporales 'PRUEBA-01' y 'PRUEBA-02' que se borran al terminar.
+crean estaciones temporales 'PRUEBA-01', 'PRUEBA-02' y 'PRUEBA-03' que se borran al terminar.
 Nunca modifican la estación real.
 """
 
@@ -13,7 +13,7 @@ from app.db import obtener_motor
 from app.main import app
 from app.seguridad import calcular_hash, generar_token
 
-CODIGOS_PRUEBA = ("PRUEBA-01", "PRUEBA-02")
+CODIGOS_PRUEBA = ("PRUEBA-01", "PRUEBA-02", "PRUEBA-03")
 
 
 def _borrar_datos_de_prueba(conexion) -> None:

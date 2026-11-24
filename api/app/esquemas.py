@@ -85,6 +85,22 @@ class Comparacion(BaseModel):
     humedad_normal: float | None
 
 
+class BrechaMinuto(BaseModel):
+    """Comparación de cada lectura (una por minuto) con el modelo y el normal interpolados."""
+
+    ts: datetime = Field(description="Instante de la lectura (UTC).")
+    temperatura_sensor: float | None
+    temperatura_modelo: float | None = Field(
+        description="Modelo regional interpolado linealmente entre la hora anterior y la siguiente."
+    )
+    brecha_termica: float | None = Field(description="Sensor menos modelo (°C).")
+    temperatura_normal: float | None = Field(description="Normal histórico interpolado entre horas.")
+    anomalia_climatologica: float | None = Field(description="Sensor menos normal histórico (°C).")
+    humedad_sensor: float | None
+    humedad_modelo: float | None
+    diferencia_humedad: float | None
+
+
 class BrechaHoraria(BaseModel):
     """Comparación hora por hora entre el sensor y el modelo meteorológico (Open-Meteo)."""
 

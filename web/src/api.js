@@ -48,6 +48,9 @@ export async function obtenerEstacion() {
   return estaciones.find((e) => e.codigo === CODIGO_ESTACION) ?? null
 }
 
+// Las consultas devuelven las N horas que TERMINAN EN LA ÚLTIMA LECTURA de la estación:
+// si la estación está detenida, se muestran sus datos más recientes en lugar de nada.
+
 // Lecturas minuto a minuto, de la más antigua a la más reciente
 export async function obtenerLecturas(horas, limite = 1000) {
   const lecturas = await pedir(`/api/v1/estaciones/${estacion}/lecturas?horas=${horas}&limite=${limite}`)
@@ -57,6 +60,12 @@ export async function obtenerLecturas(horas, limite = 1000) {
 // Comparación por hora con el modelo y el normal histórico, de la más antigua a la más reciente
 export async function obtenerBrecha(horas) {
   const filas = await pedir(`/api/v1/estaciones/${estacion}/brecha?horas=${horas}`)
+  return [...filas].reverse()
+}
+
+// Comparación minuto a minuto (modelo y normal interpolados entre horas), de la más antigua a la más reciente
+export async function obtenerBrechaMinutos(horas) {
+  const filas = await pedir(`/api/v1/estaciones/${estacion}/brecha/minutos?horas=${horas}`)
   return [...filas].reverse()
 }
 

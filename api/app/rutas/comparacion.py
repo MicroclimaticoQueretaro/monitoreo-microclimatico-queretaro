@@ -7,13 +7,15 @@ from sqlalchemy.engine import Connection
 from app.db import obtener_conexion
 from app.esquemas import Comparacion
 from app.rutas.estaciones import obtener_estacion_o_404
+from app.ventana import CTE_VENTANA, FILTRO_VENTANA
 
 router = APIRouter(tags=["Comparación"])
 
 # Cada lectura se cruza con la climatología del mismo mes y hora (hora local de Querétaro).
 # Se usa la temperatura del BMP280 cuando existe porque es más precisa (±1 °C) que la del DHT11 (±2 °C).
-CONSULTA_COMPARACION = """
-WITH sensor AS (
+CONSULTA_COMPARACION = f"""
+WITH {CTE_VENTANA},
+sensor AS (
     SELECT
         ts,
         COALESCE(temperatura_bmp, temperatura_dht) AS temperatura_sensor,
@@ -22,7 +24,7 @@ WITH sensor AS (
         EXTRACT(HOUR  FROM ts AT TIME ZONE 'America/Mexico_City')::SMALLINT AS hora
     FROM lecturas
     WHERE estacion_id = :estacion_id
-      AND ts >= now() - make_interval(hours => :horas)
+      AND {FILTRO_VENTANA}
 )
 SELECT
     s.ts,

@@ -12,6 +12,7 @@ from app.db import obtener_conexion
 from app.esquemas import Lectura, LecturaCreada, LecturaEntrada
 from app.rutas.estaciones import obtener_estacion_o_404
 from app.seguridad import autenticar_estacion
+from app.ventana import CTE_VENTANA, FILTRO_VENTANA
 
 router = APIRouter(tags=["Lecturas"])
 
@@ -68,7 +69,8 @@ def registrar_lectura(
 @router.get(
     "/estaciones/{codigo}/lecturas",
     response_model=list[Lectura],
-    summary="Consultar las lecturas recientes de una estación",
+    summary="Consultar las lecturas más recientes de una estación",
+    description="Devuelve las lecturas de las N horas que terminan en la última lectura registrada.",
 )
 def listar_lecturas(
     codigo: str,
@@ -79,9 +81,10 @@ def listar_lecturas(
     estacion = obtener_estacion_o_404(conexion, codigo)
     filas = conexion.execute(
         text(
+            f"WITH {CTE_VENTANA} "
             "SELECT ts, temperatura_dht, temperatura_bmp, humedad, presion_hpa, iluminancia_lux "
             "FROM lecturas "
-            "WHERE estacion_id = :estacion_id AND ts >= now() - make_interval(hours => :horas) "
+            f"WHERE estacion_id = :estacion_id AND {FILTRO_VENTANA} "
             "ORDER BY ts DESC LIMIT :limite"
         ),
         {"estacion_id": estacion["id"], "horas": horas, "limite": limite},
