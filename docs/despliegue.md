@@ -32,7 +32,7 @@ Navegador --> Dashboard (Render) --HTTPS (consulta la API / panel Admin)
 ## 1. Crear la base de datos en Neon
 
 1. Entrar a **neon.com** con la cuenta de GitHub → **New Project**.
-2. Nombre: `microclima`. Región: **AWS US West 2 (Oregon)** (la misma región que se usará en Render).
+2. Nombre: `microclima`. Región: **AWS US East 1 (N. Virginia)** (la misma región que la API en Render: `region: virginia` en `render.yaml`).
 3. En **Connection string**, copiar la cadena completa (empieza con `postgresql://` y termina con `sslmode=require`).
 4. Guardarla en la terminal **entre comillas simples** (contiene caracteres especiales):
    ```bash
