@@ -2,13 +2,15 @@
 // Estación meteorológica IoT — Monitoreo Microclimático de Querétaro
 // ESP32 DevKit V1 + DHT11 + BME280/BMP280 + BH1750 (GY-302) + LCD 16x2 I2C
 //
-// Flujo: muestra cada 5 s -> promedio cada 60 s -> cola -> envío HTTP a la API.
+// Flujo: muestra cada 5 s -> promedio cada 60 s -> cola -> envío HTTPS a la API.
+// Se activa o se pone en espera desde el sitio web (órdenes por MQTT, ver control.cpp).
 // Si se pierde la conexión, las lecturas esperan en la cola y se envían después.
 // La pantalla LCD rota entre clima, presión/luz y estado cada 3 s, sin detener nada.
 // =====================================================================
 #include <Arduino.h>
 
 #include "config.h"
+#include "control.h"
 #include "pantalla.h"
 #include "red.h"
 #include "sensores.h"
@@ -22,6 +24,7 @@ uint32_t ultimoMuestreo = 0;
 uint32_t ultimoPromedio = 0;
 uint32_t ultimoIntentoEnvio = 0;
 bool esperarTrasFallo = false;
+bool estabaMidiendo = true;
 
 // ---------- Cola circular de lecturas pendientes de envío ----------
 Lectura cola[TAMANO_COLA];
@@ -142,6 +145,9 @@ void actualizarPantallaSiCorresponde() {
     estado.lecturasPendientes = cantidadEnCola;
     estado.enviosExitosos = enviosExitosos;
     estado.ahora = time(nullptr);
+    estado.midiendo = modoActual() == ModoEstacion::Midiendo;
+    estado.controlRemoto = controlRemotoHabilitado();
+    estado.mqttConectado = controlConectado();
     actualizarPantalla(ultimaMuestra, estado);
 }
 
@@ -164,6 +170,7 @@ void setup() {
         iniciarWifi();
         mostrarMensajePantalla("Sincronizando", "hora (NTP)...");
         iniciarHora();
+        iniciarControl();
     } else {
         Serial.println("[MODO PRUEBA] Envio a la API desactivado (ENVIAR_A_API = false).");
     }
@@ -177,9 +184,26 @@ void loop() {
     // Ninguna tarea bloquea: el ciclo revisa qué toca hacer en cada vuelta
     if (ENVIAR_A_API) {
         mantenerWifi();
+        mantenerControl();  // órdenes de activar / detener por MQTT
     }
-    tomarMuestraSiCorresponde();
-    cerrarPromedioSiCorresponde();
+
+    const bool midiendo = modoActual() == ModoEstacion::Midiendo;
+    if (midiendo && !estabaMidiendo) {
+        // Al reactivarse se empieza un minuto nuevo (no se mezclan muestras viejas)
+        promediador.reiniciar();
+        ultimoPromedio = millis();
+        ultimoMuestreo = 0;
+        Serial.println("[CONTROL] Medicion activada.");
+    } else if (!midiendo && estabaMidiendo) {
+        Serial.println("[CONTROL] Estacion en espera: no se toman muestras.");
+    }
+    estabaMidiendo = midiendo;
+
+    if (midiendo) {
+        tomarMuestraSiCorresponde();
+        cerrarPromedioSiCorresponde();
+    }
+    // Las lecturas que quedaron en la cola se envían aunque la estación esté en espera
     enviarPendientesSiCorresponde();
     actualizarPantallaSiCorresponde();
 }

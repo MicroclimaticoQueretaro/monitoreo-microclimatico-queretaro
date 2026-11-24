@@ -14,6 +14,12 @@ Documentación interactiva (con la API corriendo): **http://localhost:8000/docs*
 | `GET` | `/api/v1/estaciones/{codigo}/lecturas?horas=24` | — | Lecturas recientes |
 | `GET` | `/api/v1/estaciones/{codigo}/comparacion?horas=24` | — | Lecturas vs. climatología (anomalía) |
 | `GET` | `/api/v1/estaciones/{codigo}/brecha?horas=24` | — | Brecha térmica hora por hora: sensor vs. modelo meteorológico |
+| `GET` | `/api/v1/estaciones/{codigo}/estado` | — | Estado remoto: `midiendo`, `en_espera`, `desconectado` o `desconocido` |
+| `POST` | `/api/v1/admin/login` | — | Inicia sesión de administrador (devuelve un token de sesión de 8 h) |
+| `GET` | `/api/v1/admin/sesion` | Admin | Verifica la sesión actual |
+| `POST` | `/api/v1/admin/logout` | Admin | Cierra la sesión |
+| `POST` | `/api/v1/estaciones/{codigo}/comando` | Admin | Envía `{"accion":"activar"}` o `{"accion":"detener"}` por MQTT |
+| `GET` | `/api/v1/estaciones/{codigo}/comandos` | Admin | Historial de órdenes (auditoría) |
 
 ## Contrato de la lectura (lo que envía el ESP32)
 
@@ -68,6 +74,22 @@ El servicio `sincronizador` descarga el modelo cada 30 minutos y lo guarda en la
 - Validación doble: Pydantic en la API y restricciones `CHECK` en PostgreSQL.
 - Consultas SQL parametrizadas (protección contra inyección SQL).
 - CORS restringido a los orígenes configurados; el contenedor corre sin privilegios de root.
+- Contraseñas de administrador con **scrypt** (sal aleatoria); las sesiones son tokens opacos y en
+  la base solo se guarda su hash. Expiran a las 8 h y se pueden cerrar.
+- **Límite de intentos:** 5 contraseñas incorrectas en 15 min por IP → `429`. El mensaje de error
+  es el mismo si el usuario no existe (no revela qué usuarios hay).
+- Cada orden activar / detener queda registrada (quién y cuándo) en la tabla `comandos`.
+- MQTT sobre **TLS** (puerto 8883) con una credencial distinta para la API y para el ESP32.
+
+### Control remoto (MQTT)
+
+| Tema | Quién publica | Contenido (retenido) |
+|---|---|---|
+| `microclima/<codigo>/comando` | API | `{"accion":"activar"\|"detener","ts":...}` |
+| `microclima/<codigo>/estado` | ESP32 | `{"estado":"midiendo"\|"en_espera","ts":...}`; si se desconecta, el broker publica `{"estado":"desconectado"}` (LWT) |
+
+Las lecturas siguen llegando por HTTPS; MQTT solo transporta órdenes y estado.
+Crear un administrador: `python -m scripts.crear_admin <usuario>` (pide la contraseña sin mostrarla).
 
 ## Desarrollo local
 

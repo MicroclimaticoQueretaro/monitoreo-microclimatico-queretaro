@@ -25,20 +25,32 @@ export function Alerta({ error }) {
   )
 }
 
-export function EstadoEstacion({ ultimaLectura, referencia }) {
+// estadoRemoto: lo que informa la estación por MQTT ("midiendo", "en_espera", "desconectado")
+export function EstadoEstacion({ ultimaLectura, referencia, estadoRemoto }) {
   const minutos =
     ultimaLectura && referencia
       ? (referencia.getTime() - new Date(ultimaLectura.ts).getTime()) / 60_000
       : Infinity
-  const activa = minutos <= MINUTOS_SIN_DATOS
+  const textoLectura = ultimaLectura
+    ? `Última lectura ${haceCuanto(ultimaLectura.ts, referencia)}`
+    : 'Aún no hay lecturas'
+
+  let clase = minutos <= MINUTOS_SIN_DATOS ? 'activa' : 'inactiva'
+  let titulo = minutos <= MINUTOS_SIN_DATOS ? 'Estación midiendo' : 'Sin datos recientes'
+  if (estadoRemoto === 'en_espera') {
+    clase = 'espera'
+    titulo = 'Estación en espera'
+  } else if (estadoRemoto === 'desconectado') {
+    clase = 'inactiva'
+    titulo = 'Estación desconectada'
+  }
+
   return (
-    <div className={`estado ${activa ? 'estado--activa' : 'estado--inactiva'}`} role="status">
+    <div className={`estado estado--${clase}`} role="status">
       <span className="estado__punto" aria-hidden="true" />
       <div>
-        <strong>{activa ? 'Estación midiendo' : 'Sin datos recientes'}</strong>
-        <span>
-          {ultimaLectura ? `Última lectura ${haceCuanto(ultimaLectura.ts, referencia)}` : 'Aún no hay lecturas'}
-        </span>
+        <strong>{titulo}</strong>
+        <span>{textoLectura}</span>
       </div>
     </div>
   )

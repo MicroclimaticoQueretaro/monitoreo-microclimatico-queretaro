@@ -4,6 +4,7 @@ Este archivo es el "contrato" entre el firmware del ESP32 y la API.
 """
 
 from datetime import datetime
+from typing import Literal
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
@@ -120,3 +121,34 @@ class BrechaHoraria(BaseModel):
         description="ESTIMACIÓN de radiación solar (W/m²) a partir de lux (÷120). Aproximada."
     )
     radiacion_modelo: float | None = Field(description="Radiación solar del modelo (W/m²).")
+
+
+# --- Administración y control remoto ---
+
+class CredencialesAdmin(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    usuario: str = Field(min_length=3, max_length=40)
+    contrasena: str = Field(min_length=1, max_length=200)
+
+
+class SesionAdmin(BaseModel):
+    token: str | None = Field(description="Token de sesión: se envía como 'Authorization: Bearer <token>'.")
+    usuario: str
+    expira_en: datetime
+
+
+class ComandoEstacion(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    accion: Literal["activar", "detener"]
+
+
+class RegistroComando(BaseModel):
+    accion: str
+    enviado_en: datetime
+    usuario: str | None
+
+
+class EstadoEstacion(BaseModel):
+    estado: str = Field(description="midiendo, en_espera, desconectado o desconocido")
+    ts: str | None = Field(description="Momento en que la estación informó su estado (si lo envió).")
+    control_remoto: bool = Field(description="True si el control por MQTT está configurado en la API.")

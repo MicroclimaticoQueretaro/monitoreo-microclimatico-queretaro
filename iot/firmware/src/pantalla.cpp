@@ -66,16 +66,30 @@ void mostrarPaginaPresionLuz(const Medicion& m) {
     escribirLinea(1, linea2);
 }
 
+// Estado de MQTT en 2 caracteres: OK, -- (sin conexión) o NA (no configurado)
+const char* textoMqtt(const EstadoSistema& e) {
+    if (!e.controlRemoto) return "NA";
+    return e.mqttConectado ? "OK" : "--";
+}
+
+// En espera no se mide: la pantalla lo indica en lugar de rotar las páginas
+void mostrarPaginaEspera(const EstadoSistema& e) {
+    char linea2[32];
+    snprintf(linea2, sizeof(linea2), "W:%s M:%s", e.wifiConectado ? "OK" : "--", textoMqtt(e));
+    escribirLinea(0, "En espera");
+    escribirLinea(1, linea2);
+}
+
 void mostrarPaginaEstado(const EstadoSistema& e) {
     char linea1[32];
     char linea2[32];
     if (e.horaValida) {
         struct tm fecha;
         localtime_r(&e.ahora, &fecha);
-        snprintf(linea1, sizeof(linea1), "%02d:%02d  WiFi:%s", fecha.tm_hour, fecha.tm_min,
-                 e.wifiConectado ? "OK" : "--");
+        snprintf(linea1, sizeof(linea1), "%02d:%02d W:%s M:%s", fecha.tm_hour, fecha.tm_min,
+                 e.wifiConectado ? "OK" : "--", textoMqtt(e));
     } else {
-        snprintf(linea1, sizeof(linea1), "--:--  WiFi:%s", e.wifiConectado ? "OK" : "--");
+        snprintf(linea1, sizeof(linea1), "--:-- W:%s M:%s", e.wifiConectado ? "OK" : "--", textoMqtt(e));
     }
     snprintf(linea2, sizeof(linea2), "Env:%lu Pend:%u",
              static_cast<unsigned long>(e.enviosExitosos),
@@ -122,6 +136,10 @@ void actualizarPantalla(const Medicion& ultimaMuestra, const EstadoSistema& esta
     }
     ultimoCambioPagina = millis();
 
+    if (!estado.midiendo) {
+        mostrarPaginaEspera(estado);
+        return;
+    }
     switch (paginaActual) {
         case 0: mostrarPaginaClima(ultimaMuestra); break;
         case 1: mostrarPaginaPresionLuz(ultimaMuestra); break;

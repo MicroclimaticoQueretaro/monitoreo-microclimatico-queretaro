@@ -6,3 +6,5 @@ sqlalchemy>=2.0
 psycopg[binary]>=3.2
 # Cliente HTTP para descargar el modelo meteorológico
 httpx>=0.28
+# Cliente MQTT para enviar comandos a la estación
+paho-mqtt>=2.1

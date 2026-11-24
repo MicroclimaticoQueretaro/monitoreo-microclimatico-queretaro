@@ -1,12 +1,13 @@
 // Estructura general del sitio: cabecera con menú, sección actual y pie de página.
 import Cabecera from './componentes/Cabecera'
 import Pie from './componentes/Pie'
+import Admin from './paginas/Admin'
 import Graficos from './paginas/Graficos'
 import Inicio from './paginas/Inicio'
 import Sobre from './paginas/Sobre'
 import { useRuta } from './rutas'
 
-const PAGINAS = { inicio: Inicio, graficos: Graficos, sobre: Sobre }
+const PAGINAS = { inicio: Inicio, graficos: Graficos, sobre: Sobre, admin: Admin }
 
 export default function App() {
   const ruta = useRuta()

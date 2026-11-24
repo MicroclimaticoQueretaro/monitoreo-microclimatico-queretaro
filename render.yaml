@@ -17,6 +17,12 @@ services:
         value: "true"
       - key: ORIGENES_CORS         # ej.: ["https://microclima-dashboard.onrender.com"]
         sync: false
+      - key: MQTT_HOST             # dirección del clúster de HiveMQ Cloud (ej. xxxx.s1.eu.hivemq.cloud)
+        sync: false
+      - key: MQTT_USUARIO          # credencial de la API en HiveMQ (secreta)
+        sync: false
+      - key: MQTT_CONTRASENA
+        sync: false
 
   # Dashboard (React) como sitio estático: gratuito y sin "dormirse".
   - type: web
